@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}About — AFRACS Admin{% endblock %}
+
+{% block topbar_icon %}
+<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+  <path fill-rule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-7-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM9 9a.75.75 0 0 0 0 1.5h.253a.25.25 0 0 1 .244.304l-.459 2.066A1.75 1.75 0 0 0 10.747 15H11a.75.75 0 0 0 0-1.5h-.253a.25.25 0 0 1-.244-.304l.459-2.066A1.75 1.75 0 0 0 9.253 9H9Z" clip-rule="evenodd"/>
+</svg>
+{% endblock %}
+{% block topbar_title %}About{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto space-y-6">
+
+  <div class="card overflow-hidden">
+    <div class="bg-maroon-dark px-8 py-10 flex items-center gap-6">
+      <img src="{{ url_for('static', filename='img/afracs_logo.png') }}" alt="AFRACS" class="w-16 h-16 flex-shrink-0 rounded-lg">
+      <div>
+        <h1 class="text-white text-2xl font-bold tracking-tight">AFRACS</h1>
+        <p class="text-gold text-sm mt-0.5">Automated Facial Recognition Access Control System</p>
+        <p class="text-white/50 text-xs mt-2">Version 1.0.0-beta</p>
+      </div>
+    </div>
+    <div class="px-8 py-5">
+      <p class="text-gray-600 text-sm leading-relaxed">
+        AFRACS provides automated facial recognition-based access control for equipment cabinets
+        at the <strong>College of Health</strong>, <strong>University of Cagayan Valley</strong>.
+        It replaces manual key access with a fast, logged, and contact-free authentication system
+        powered by a Raspberry Pi and an AI-driven face recognition pipeline.
+      </p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+    <div class="card px-6 py-5">
+      <div class="flex items-center gap-3 mb-4">
+        <img src="{{ url_for('static', filename='img/ucv_logo.png') }}" alt="UCV" class="w-9 h-9">
+        <div>
+          <p class="font-semibold text-sm text-gray-800">University of Cagayan Valley</p>
+          <p class="text-xs text-gray-400">Tuguegarao City, Philippines</p>
+        </div>
+      </div>
+      <p class="text-xs text-gray-500 leading-relaxed">
+        College of Health &mdash; Equipment Cabinet Access Control System.
+        Deployed on-premises for secure, offline-first facial recognition access management.
+      </p>
+    </div>
+
+    <div class="card px-6 py-5">
+      <p class="font-semibold text-sm text-gray-800 mb-3">System Features</p>
+      <ul class="space-y-1.5 text-xs text-gray-500">
+        <li class="flex items-center gap-2">
+          <span class="w-1.5 h-1.5 rounded-full bg-gold flex-shrink-0"></span>
+          Camera integration &amp; real-time recognition
+        </li>
+        <li class="flex items-center gap-2">
+          <span class="w-1.5 h-1.5 rounded-full bg-gold flex-shrink-0"></span>
+          Faculty face registration &amp; enrollment
+        </li>
+        <li class="flex items-center gap-2">
+          <span class="w-1.5 h-1.5 rounded-full bg-gold flex-shrink-0"></span>
+          GPIO-controlled solenoid lock/unlock
+        </li>
+        <li class="flex items-center gap-2">
+          <span class="w-1.5 h-1.5 rounded-full bg-gold flex-shrink-0"></span>
+          Unauthorized attempt alerting
+        </li>
+        <li class="flex items-center gap-2">
+          <span class="w-1.5 h-1.5 rounded-full bg-gold flex-shrink-0"></span>
+          Full audit access log trail
+        </li>
+        <li class="flex items-center gap-2">
+          <span class="w-1.5 h-1.5 rounded-full bg-gold flex-shrink-0"></span>
+          PyQt6 touchscreen cabinet UI
+        </li>
+        <li class="flex items-center gap-2">
+          <span class="w-1.5 h-1.5 rounded-full bg-gold flex-shrink-0"></span>
+          Flask admin dashboard (this app)
+        </li>
+      </ul>
+    </div>
+
+  </div>
+
+  <div class="card px-6 py-5">
+    <p class="font-semibold text-sm text-gray-800 mb-4">Technology Stack</p>
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+      {% set stack = [
+        ('Python 3.11', 'Runtime'),
+        ('OpenCV SFace', 'Face Recognition'),
+        ('PyQt6', 'Cabinet UI'),
+        ('Flask 3.0', 'Admin Dashboard'),
+        ('MySQL / MariaDB', 'Database'),
+        ('Raspberry Pi', 'Target Hardware'),
+        ('gpiozero', 'GPIO / Lock Control'),
+        ('Tailwind CSS 3', 'Dashboard Styles'),
+      ] %}
+      {% for name, role in stack %}
+      <div class="bg-gray-50 border border-gray-100 rounded-lg px-3 py-2">
+        <p class="text-xs font-semibold text-gray-700">{{ name }}</p>
+        <p class="text-[10px] text-gray-400 mt-0.5">{{ role }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <p class="text-center text-xs text-gray-400 pb-4">
+    &copy; 2025 AFRACS &mdash; University of Cagayan Valley, College of Health
+  </p>
+
+</div>
+{% endblock %}

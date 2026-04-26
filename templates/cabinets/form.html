@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}{{ action }} Cabinet — AFRACS Admin{% endblock %}
+
+{% block topbar_icon %}
+<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+  <path d="M2 3a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H2Z"/>
+  <path fill-rule="evenodd" d="M2 7.5h16l-.811 7.71a2 2 0 0 1-1.99 1.79H4.802a2 2 0 0 1-1.99-1.79L2 7.5ZM7 11a1 1 0 0 1 1-1h4a1 1 0 1 1 0 2H8a1 1 0 0 1-1-1Z" clip-rule="evenodd"/>
+</svg>
+{% endblock %}
+{% block topbar_title %}{{ action }} Cabinet{% endblock %}
+
+{% block content %}
+<div class="flex items-center gap-2 mb-4">
+  <a href="{{ url_for('cabinet_list') }}" class="text-gray-400 text-sm hover:text-maroon">← Cabinets</a>
+  <span class="text-gray-300">/</span>
+  <h5 class="page-header mb-0 pb-0 border-0 text-base">{{ action }} Cabinet</h5>
+</div>
+
+<div class="card max-w-md">
+  <div class="p-6">
+    <form method="post" class="space-y-4">
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 mb-1">
+          Cabinet ID <span class="text-red-500">*</span>
+        </label>
+        <input type="text" name="cabinet_id" class="form-input uppercase"
+               value="{{ cabinet.cabinet_id if cabinet else '' }}"
+               placeholder="e.g. A, B, LAB1" required autofocus maxlength="50">
+        <p class="text-xs text-gray-400 mt-1">Short unique identifier. Stored uppercase.</p>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 mb-1">Description</label>
+        <input type="text" name="description" class="form-input"
+               value="{{ cabinet.description if cabinet else '' }}"
+               placeholder="e.g. Medical Supplies Cabinet">
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 mb-1">Location</label>
+        <input type="text" name="location" class="form-input"
+               value="{{ cabinet.location if cabinet else '' }}"
+               placeholder="e.g. College of Health - Room 201">
+      </div>
+      <div class="flex gap-2 pt-2">
+        <button type="submit" class="btn-primary">{{ action }} Cabinet</button>
+        <a href="{{ url_for('cabinet_list') }}" class="btn-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+

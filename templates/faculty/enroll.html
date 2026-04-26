@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+{% block title %}Enroll Face — {{ faculty.name }} — AFRACS Admin{% endblock %}
+
+{% block topbar_icon %}
+<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+  <path d="M7 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM14.5 9a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5ZM1.615 16.428a1.224 1.224 0 0 1-.569-1.175 6.002 6.002 0 0 1 11.908 0c.058.467-.172.92-.57 1.174A9.953 9.953 0 0 1 7 18a9.953 9.953 0 0 1-5.385-1.572ZM14.5 16h-.106c.07-.297.088-.611.048-.933a7.47 7.47 0 0 0-1.588-3.755 4.502 4.502 0 0 1 5.874 2.153c.168.341.073.744-.25.941A7.468 7.468 0 0 1 14.5 16Z"/>
+</svg>
+{% endblock %}
+{% block topbar_title %}Enroll Face — {{ faculty.name }}{% endblock %}
+
+{% block content %}
+<div class="flex items-center gap-2 mb-4">
+  <a href="{{ url_for('faculty_list') }}" class="text-gray-400 text-sm hover:text-maroon">← Faculty</a>
+  <span class="text-gray-300">/</span>
+  <h5 class="page-header mb-0 pb-0 border-0 text-base">Enroll Face — {{ faculty.name }}</h5>
+</div>
+
+{% if faculty.has_face %}
+<div class="flash-success mb-4 max-w-2xl">
+  Face already enrolled. You can re-enroll to update it.
+</div>
+{% endif %}
+
+<div class="max-w-2xl">
+  <div class="flex border-b border-gray-200 mb-4 gap-1">
+    <button id="tab-btn-webcam" data-tab="webcam"
+            class="tab-btn px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors
+                   border-maroon text-maroon">
+      Webcam Capture
+    </button>
+    <button id="tab-btn-upload" data-tab="upload"
+            class="tab-btn px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors
+                   border-transparent text-gray-500 hover:text-gray-700">
+      Upload Photo
+    </button>
+  </div>
+
+  <div id="tab-webcam" class="card">
+    <div class="p-5">
+      <p class="text-gray-400 text-sm mb-4">
+        Ask the faculty member to sit in front of the camera, look straight ahead, then click <strong>Capture</strong>.
+      </p>
+      <div class="relative inline-block mb-4">
+        <video id="webcam-video" width="480" height="360" autoplay playsinline
+               class="rounded-lg border border-gray-200 bg-gray-900 block"></video>
+        <canvas id="webcam-canvas" width="480" height="360" class="hidden"></canvas>
+        <div id="webcam-overlay"
+             class="hidden absolute inset-0 bg-black/55 flex items-center justify-center rounded-lg">
+          <div class="text-center text-white">
+            <div class="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+            <p class="text-sm">Processing…</p>
+          </div>
+        </div>
+      </div>
+      <div class="flex gap-2 items-center">
+        <button id="btn-start-cam" class="btn-secondary text-sm">Start Camera</button>
+        <button id="btn-capture" class="btn-primary text-sm" disabled>Capture</button>
+        <button id="btn-stop-cam" class="btn-danger text-sm hidden">Stop</button>
+      </div>
+      <div id="webcam-result" class="mt-3 hidden"></div>
+    </div>
+  </div>
+
+  <div id="tab-upload" class="card hidden">
+    <div class="p-5">
+      <p class="text-gray-400 text-sm mb-4">
+        Upload a clear, front-facing photo (JPG or PNG). The system will detect and extract the face automatically.
+      </p>
+      <div id="drop-zone"
+           class="border-2 border-dashed border-gray-300 rounded-xl text-center py-12 px-4 mb-4 cursor-pointer
+                  hover:border-maroon hover:bg-maroon/5 transition-colors">
+        <p class="text-gray-400 text-sm">Drag &amp; drop a photo here, or <strong>click to browse</strong></p>
+        <input type="file" id="upload-input" accept="image/*" class="hidden">
+      </div>
+      <div id="upload-preview" class="mb-4 hidden">
+        <img id="preview-img" src="" alt="Preview"
+             class="rounded-lg border border-gray-200 max-h-64 max-w-full object-contain">
+      </div>
+      <div class="flex gap-2">
+        <button id="btn-upload" class="btn-primary text-sm" disabled>Enroll from Photo</button>
+        <button id="btn-clear-upload" class="btn-secondary text-sm hidden">Clear</button>
+      </div>
+      <div id="upload-result" class="mt-3 hidden"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const UPLOAD_URL  = "{{ url_for('faculty_enroll_upload', faculty_id=faculty.id) }}";
+const CAPTURE_URL = "{{ url_for('faculty_enroll_capture', faculty_id=faculty.id) }}";
+const LIST_URL    = "{{ url_for('faculty_list') }}";
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => {
+      b.classList.remove('border-maroon', 'text-maroon');
+      b.classList.add('border-transparent', 'text-gray-500');
+    });
+    btn.classList.add('border-maroon', 'text-maroon');
+    btn.classList.remove('border-transparent', 'text-gray-500');
+    const tab = btn.dataset.tab;
+    document.getElementById('tab-webcam').classList.toggle('hidden', tab !== 'webcam');
+    document.getElementById('tab-upload').classList.toggle('hidden',  tab !== 'upload');
+    if (tab !== 'webcam') stopCamera();
+  });
+});
+
+function showResult(el, ok, msg) {
+  el.classList.remove('hidden');
+  el.innerHTML = `<div class="${ok ? 'flash-success' : 'flash-danger'}">
+    ${msg}
+    ${ok ? `<a href="${LIST_URL}" class="font-semibold underline ml-2">Back to faculty list →</a>` : ''}
+  </div>`;
+}
+
+let stream = null;
+const video      = document.getElementById('webcam-video');
+const canvas     = document.getElementById('webcam-canvas');
+const overlay    = document.getElementById('webcam-overlay');
+const btnStart   = document.getElementById('btn-start-cam');
+const btnStop    = document.getElementById('btn-stop-cam');
+const btnCapture = document.getElementById('btn-capture');
+const webcamResult = document.getElementById('webcam-result');
+
+btnStart.addEventListener('click', startCamera);
+btnStop.addEventListener('click',  stopCamera);
+btnCapture.addEventListener('click', captureFrame);
+
+async function startCamera() {
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+    video.srcObject = stream;
+    btnStart.classList.add('hidden');
+    btnStop.classList.remove('hidden');
+    btnCapture.disabled = false;
+    webcamResult.classList.add('hidden');
+  } catch (err) {
+    showResult(webcamResult, false, `Camera error: ${err.message}`);
+  }
+}
+
+function stopCamera() {
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+  video.srcObject = null;
+  btnStart.classList.remove('hidden');
+  btnStop.classList.add('hidden');
+  btnCapture.disabled = true;
+}
+
+async function captureFrame() {
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+  btnCapture.disabled = true;
+  overlay.classList.remove('hidden');
+  try {
+    const res  = await fetch(CAPTURE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image: dataUrl }),
+    });
+    const json = await res.json();
+    showResult(webcamResult, json.ok, json.ok ? 'Face enrolled successfully!' : json.error);
+  } catch (e) {
+    showResult(webcamResult, false, 'Network error. Please try again.');
+  } finally {
+    overlay.classList.add('hidden');
+    btnCapture.disabled = false;
+  }
+}
+
+const dropZone     = document.getElementById('drop-zone');
+const uploadInput  = document.getElementById('upload-input');
+const previewImg   = document.getElementById('preview-img');
+const uploadPreview = document.getElementById('upload-preview');
+const btnUpload    = document.getElementById('btn-upload');
+const btnClear     = document.getElementById('btn-clear-upload');
+const uploadResult = document.getElementById('upload-result');
+let selectedFile   = null;
+
+dropZone.addEventListener('click', () => uploadInput.click());
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('border-maroon','bg-maroon/5'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('bg-maroon/5'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('bg-maroon/5');
+  const f = e.dataTransfer.files[0];
+  if (f && f.type.startsWith('image/')) setFile(f);
+});
+uploadInput.addEventListener('change', () => { if (uploadInput.files[0]) setFile(uploadInput.files[0]); });
+
+function setFile(f) {
+  selectedFile = f;
+  previewImg.src = URL.createObjectURL(f);
+  uploadPreview.classList.remove('hidden');
+  btnUpload.disabled = false;
+  btnClear.classList.remove('hidden');
+  uploadResult.classList.add('hidden');
+}
+
+btnClear.addEventListener('click', () => {
+  selectedFile = null;
+  previewImg.src = '';
+  uploadPreview.classList.add('hidden');
+  btnUpload.disabled = true;
+  btnClear.classList.add('hidden');
+  uploadResult.classList.add('hidden');
+  uploadInput.value = '';
+});
+
+btnUpload.addEventListener('click', async () => {
+  if (!selectedFile) return;
+  btnUpload.disabled = true;
+  btnUpload.textContent = 'Processing…';
+  const form = new FormData();
+  form.append('photo', selectedFile);
+  try {
+    const res  = await fetch(UPLOAD_URL, { method: 'POST', body: form });
+    const json = await res.json();
+    showResult(uploadResult, json.ok, json.ok ? 'Face enrolled successfully!' : json.error);
+  } catch (e) {
+    showResult(uploadResult, false, 'Network error. Please try again.');
+  } finally {
+    btnUpload.disabled = false;
+    btnUpload.textContent = 'Enroll from Photo';
+  }
+});
+</script>
+{% endblock %}
+

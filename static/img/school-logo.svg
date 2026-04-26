@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" fill="none">
+  <!-- Shield shape -->
+  <path d="M20 3 L34 8.5 L34 20 C34 28 27 34.5 20 37 C13 34.5 6 28 6 20 L6 8.5 Z"
+        fill="#6C0200" stroke="#D4B356" stroke-width="1.5"/>
+  <!-- UCV text -->
+  <text x="20" y="24" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+        font-size="9" font-weight="700" fill="#D4B356" letter-spacing="0.5">UCV</text>
+</svg>

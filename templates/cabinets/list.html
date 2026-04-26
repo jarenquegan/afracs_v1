@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Cabinets — AFRACS Admin{% endblock %}
+
+{% block topbar_icon %}
+<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+  <path d="M2 3a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H2Z"/>
+  <path fill-rule="evenodd" d="M2 7.5h16l-.811 7.71a2 2 0 0 1-1.99 1.79H4.802a2 2 0 0 1-1.99-1.79L2 7.5ZM7 11a1 1 0 0 1 1-1h4a1 1 0 1 1 0 2H8a1 1 0 0 1-1-1Z" clip-rule="evenodd"/>
+</svg>
+{% endblock %}
+{% block topbar_title %}Cabinets{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-4">
+  <h4 class="page-header mb-0">Cabinets</h4>
+  <a href="{{ url_for('cabinet_add') }}" class="btn-primary">+ Add Cabinet</a>
+</div>
+
+<div class="card">
+  <div class="overflow-x-auto">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Cabinet ID</th>
+          <th>Description</th>
+          <th>Location</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for cab in cabinets %}
+        <tr>
+          <td><span class="badge badge-cabinet text-sm px-3 py-1">{{ cab.cabinet_id }}</span></td>
+          <td>{{ cab.description or '—' }}</td>
+          <td class="text-gray-400 text-sm">{{ cab.location or '—' }}</td>
+          <td class="text-right">
+            <div class="flex items-center justify-end gap-1">
+              <a href="{{ url_for('cabinet_edit', cabinet_id=cab.id) }}" class="btn-edit">Edit</a>
+              <form method="post" action="{{ url_for('cabinet_delete', cabinet_id=cab.id) }}" class="inline"
+                    onsubmit="return confirm('Delete Cabinet {{ cab.cabinet_id }}? All access logs for this cabinet will also be deleted.')">
+                <button class="btn-danger">Delete</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="4" class="text-center text-gray-400 py-6">
+            No cabinets yet.
+            <a href="{{ url_for('cabinet_add') }}" class="text-maroon hover:underline ml-1">Add one →</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+

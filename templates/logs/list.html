@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Access Logs — AFRACS Admin{% endblock %}
+
+{% block topbar_icon %}
+<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+  <path fill-rule="evenodd" d="M15.988 3.012A2.25 2.25 0 0 1 18 5.25v6.5A2.25 2.25 0 0 1 15.75 14H13.5v-3.379a3 3 0 0 0-.879-2.121l-3.12-3.121a3 3 0 0 0-1.402-.791A2.252 2.252 0 0 1 10.25 3h5.738ZM10.5 4.75v2.5a.75.75 0 0 0 .75.75h2.5a.75.75 0 0 0 0-1.5h-1.69L10.5 4.75Z" clip-rule="evenodd"/>
+  <path d="M7.75 13a.75.75 0 0 1 .75.75v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 .75-.75ZM4.25 14.5a.75.75 0 0 1 .75.75v1.25a.75.75 0 0 1-1.5 0v-1.25a.75.75 0 0 1 .75-.75ZM2 11.75A2.25 2.25 0 0 1 4.25 9.5h5.5A2.25 2.25 0 0 1 12 11.75v4.5A2.25 2.25 0 0 1 9.75 18.5h-5.5A2.25 2.25 0 0 1 2 16.25v-4.5Z"/>
+</svg>
+{% endblock %}
+{% block topbar_title %}Access Logs{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-4">
+  <h4 class="page-header mb-0">Access Logs</h4>
+  <span class="text-gray-400 text-sm">{{ total }} total event{{ 's' if total != 1 }}</span>
+</div>
+
+<div class="card">
+  <div class="overflow-x-auto">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          <th>Faculty</th>
+          <th>ID Number</th>
+          <th>Cabinet</th>
+          <th>Status</th>
+          <th>Note</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in logs %}
+        <tr>
+          <td class="text-gray-400 text-xs whitespace-nowrap">{{ log.timestamp }}</td>
+          <td>{{ log.faculty_name or '<em class="text-gray-400">Unknown</em>' | safe }}</td>
+          <td class="text-gray-400 text-xs">{{ log.id_number or '—' }}</td>
+          <td><span class="badge badge-cabinet">{{ log.cabinet or '?' }}</span></td>
+          <td>
+            {% if log.status == 'granted' %}
+              <span class="status-granted">Granted</span>
+            {% else %}
+              <span class="status-denied">Denied</span>
+            {% endif %}
+          </td>
+          <td class="text-gray-400 text-xs">{{ log.note or '' }}</td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="6" class="text-center text-gray-400 py-6">No access events recorded yet.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if pages > 1 %}
+  <div class="px-4 py-3 border-t border-gray-100 flex justify-center gap-1">
+    <a href="{{ url_for('logs', page=page-1) }}"
+       class="px-3 py-1 text-sm rounded border border-gray-200 {% if page == 1 %}pointer-events-none text-gray-300{% else %}hover:bg-gray-50{% endif %}">
+      ‹
+    </a>
+    {% for p in range(1, pages+1) %}
+      {% if p == page or p == 1 or p == pages or (p >= page-2 and p <= page+2) %}
+        <a href="{{ url_for('logs', page=p) }}"
+           class="px-3 py-1 text-sm rounded border {% if p == page %}bg-maroon text-white border-maroon{% else %}border-gray-200 hover:bg-gray-50{% endif %}">
+          {{ p }}
+        </a>
+      {% elif p == page-3 or p == page+3 %}
+        <span class="px-2 py-1 text-sm text-gray-300">…</span>
+      {% endif %}
+    {% endfor %}
+    <a href="{{ url_for('logs', page=page+1) }}"
+       class="px-3 py-1 text-sm rounded border border-gray-200 {% if page == pages %}pointer-events-none text-gray-300{% else %}hover:bg-gray-50{% endif %}">
+      ›
+    </a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — AFRACS Admin{% endblock %}
+
+{% block topbar_title %}Dashboard{% endblock %}
+
+{% block content %}
+<h4 class="page-header mb-4">Dashboard</h4>
+
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+  <div class="stat-card">
+    <p class="text-xs uppercase tracking-widest text-gray-400 mb-1">Enrolled Faculty</p>
+    <p class="text-3xl font-bold text-maroon">{{ faculty_count }}</p>
+  </div>
+  <div class="stat-card">
+    <p class="text-xs uppercase tracking-widest text-gray-400 mb-1">Cabinets</p>
+    <p class="text-3xl font-bold text-maroon">{{ cabinet_count }}</p>
+  </div>
+  <div class="stat-card">
+    <p class="text-xs uppercase tracking-widest text-gray-400 mb-1">Total Access Events</p>
+    <p class="text-3xl font-bold text-maroon">{{ log_count }}</p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="px-4 py-3 font-semibold text-sm border-b border-gray-100 text-gray-700">
+    Recent Access Events
+  </div>
+  <div class="overflow-x-auto">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          <th>Faculty</th>
+          <th>Cabinet</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in recent_logs %}
+        <tr>
+          <td class="text-gray-400 text-xs text-nowrap">{{ log.timestamp }}</td>
+          <td>{{ log.faculty_name or '— Unknown —' }}</td>
+          <td><span class="badge badge-cabinet">{{ log.cabinet or '?' }}</span></td>
+          <td>
+            {% if log.status == 'granted' %}
+              <span class="status-granted">Granted</span>
+            {% else %}
+              <span class="status-denied">Denied</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="4" class="text-center text-gray-400 py-6">No access events yet.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="px-4 py-2 border-t border-gray-100">
+    <a href="{{ url_for('logs') }}" class="text-maroon text-sm hover:underline">View all logs →</a>
+  </div>
+</div>
+{% endblock %}
+

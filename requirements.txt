@@ -1,0 +1,12 @@
+opencv-contrib-python>=4.10,<5
+
+PyQt6>=6.7,<7
+
+Flask>=3.0,<4
+
+PyMySQL>=1.1.1
+
+gpiozero>=2.0
+lgpio>=0.2.2.0; sys_platform == "linux"
+
+python-dotenv>=1.0

@@ -1,0 +1,75 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.so
+*.pyd
+build/
+dist/
+*.egg-info/
+pip-wheel-metadata/
+
+# Virtual environment (keep .python-version — pins project Python)
+.venv/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node.js / Tailwind
+node_modules/
+# Compiled CSS is generated — commit static/src/input.css, not output
+static/css/output.css
+
+# Environment & secrets
+.env
+.env.local
+.env.*.local
+
+# AFRACS-specific
+# ML models fetched by python -m afracs.download_models
+models/*.onnx
+# Face capture data
+faces/
+# Runtime SQLite/DB files (project uses MySQL but guard anyway)
+*.db
+*.sqlite
+*.sqlite3
+
+# AI / agentic coding tooling — exclude before client handover
+CLAUDE.md
+CLAUDE.local.md
+GEMINI.md
+GEMINI.local.md
+AGENTS.md
+.cursorrules
+.windsurfrules
+copilot-instructions.md
+.github/copilot-instructions.md
+.claude/
+.gemini/
+.cursor/
+.windsurf/
+.aider*
+.continue/
+.devin/
+.copilot/
+.codeium/
+.tabnine/
+.skills/
+.superpowers/
+docs/superpowers/
+docs/specs/
+docs/plans/
+.agent/
+.agents/
+.ai/
+
+# Editors / OS
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+Thumbs.db
