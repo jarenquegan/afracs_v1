@@ -52,3 +52,19 @@ class Radius:
     MD = 10
     LG = 16
     PILL = 28
+
+
+_rescaled = False
+
+
+def rescale(factor: float) -> None:
+    """Scale all size/spacing tokens by factor. Call once before building QSS."""
+    global _rescaled
+    if _rescaled:
+        return
+    _rescaled = True
+    factor = max(0.4, min(factor, 3.0))
+    for cls in (FontSize, Space, Radius):
+        for attr in list(vars(cls)):
+            if not attr.startswith("_") and isinstance(getattr(cls, attr), (int, float)):
+                setattr(cls, attr, max(1, round(getattr(cls, attr) * factor)))

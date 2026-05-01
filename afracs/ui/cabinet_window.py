@@ -34,7 +34,7 @@ from afracs.ui.pages import (
     SleepPage,
 )
 from afracs.ui.status_bar import StatusBar
-from afracs.ui.styles import CABINET_QSS
+from afracs.ui.styles import make_qss
 
 log = logging.getLogger(__name__)
 
@@ -57,7 +57,7 @@ class CabinetWindow(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
         self.setWindowTitle(f"AFRACS — {config.CABINET_NAME}")
-        self.setStyleSheet(CABINET_QSS)
+        self.setStyleSheet(make_qss())
 
         self._failed_attempts = 0
         self._cap: cv2.VideoCapture | None = None
@@ -125,7 +125,6 @@ class CabinetWindow(QMainWindow):
         layout.addWidget(self.status_bar)
 
         self.setCentralWidget(root)
-        self.resize(960, 600)
 
     def _wire_pages(self) -> None:
         self.sleep_page.wake_requested.connect(self.wake)
@@ -403,10 +402,19 @@ class CabinetWindow(QMainWindow):
 
 def main() -> int:
     app = QApplication(sys.argv)
+
+    screen = app.primaryScreen()
+    geom = screen.availableGeometry()
+    # Reference design: 960×600. Scale all tokens to match actual screen.
+    scale = min(geom.width() / 960, geom.height() / 600)
+    theme.rescale(scale)
+
     family = install_fonts() or theme.FONT_FAMILY
-    app.setFont(QFont(family, 11))
+    base_font_size = max(8, round(11 * scale))
+    app.setFont(QFont(family, base_font_size))
+
     win = CabinetWindow()
-    win.show()
+    win.showMaximized()
     return app.exec()
 
 

@@ -22,7 +22,6 @@ class DetectingPage(QWidget):
         self.camera_view = QLabel("Initializing camera…")
         self.camera_view.setObjectName("cameraView")
         self.camera_view.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.camera_view.setMinimumSize(640, 360)
         self.camera_view.setScaledContents(False)
         layout.addWidget(self.camera_view, stretch=1)
 
@@ -45,7 +44,7 @@ class DetectingPage(QWidget):
         img = QImage(rgb.data, w, h, w * 3, QImage.Format.Format_RGB888).copy()
         pix = QPixmap.fromImage(img).scaled(
             self.camera_view.size(),
-            Qt.AspectRatioMode.KeepAspectRatioByExpanding,
+            Qt.AspectRatioMode.KeepAspectRatio,
             Qt.TransformationMode.SmoothTransformation,
         )
         self.camera_view.setPixmap(pix)

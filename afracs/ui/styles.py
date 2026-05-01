@@ -2,13 +2,14 @@
 
 from afracs import theme
 
-T = theme
-FW = theme.FontWeight
-FS = theme.FontSize
-SP = theme.Space
-R = theme.Radius
 
-CABINET_QSS = f"""
+def make_qss() -> str:
+    T = theme
+    FW = theme.FontWeight
+    FS = theme.FontSize
+    SP = theme.Space
+    R = theme.Radius
+    return f"""
 * {{
     font-family: {T.FONT_STACK};
 }}
@@ -228,3 +229,6 @@ QLabel#statusBarDateTime {{
     letter-spacing: 0.5px;
 }}
 """
+
+
+CABINET_QSS = make_qss()
