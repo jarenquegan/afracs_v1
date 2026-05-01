@@ -291,6 +291,7 @@ class CabinetWindow(QMainWindow):
             return
 
         self._frame_count += 1
+        frame = cv2.flip(frame, 1)
 
         if self._engine is not None and self._frame_count % _RECOGNITION_EVERY_N == 0:
             result = self._engine.process_frame(frame, self._known_faces)

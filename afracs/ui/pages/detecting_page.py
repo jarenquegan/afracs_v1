@@ -26,7 +26,7 @@ class _CameraView(QWidget):
         self._text = "Initializing camera…"
 
     def show_frame(self, frame) -> None:
-        rgb = cv2.cvtColor(cv2.flip(frame, 1), cv2.COLOR_BGR2RGB)
+        rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         h, w, _ = rgb.shape
         img = QImage(rgb.data, w, h, w * 3, QImage.Format.Format_RGB888).copy()
         self._pixmap = QPixmap.fromImage(img)
