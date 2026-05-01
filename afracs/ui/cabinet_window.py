@@ -215,6 +215,8 @@ class CabinetWindow(QMainWindow):
         try:
             if self._db_conn is None or not self._db_conn.open:
                 self._db_conn = db.connect()
+            else:
+                self._db_conn.commit()
             rows = db.load_known_faces(self._db_conn)
         except Exception as exc:
             log.warning("Could not load known faces from DB: %s", exc)
@@ -232,6 +234,8 @@ class CabinetWindow(QMainWindow):
         try:
             if self._db_conn is None or not self._db_conn.open:
                 self._db_conn = db.connect()
+            else:
+                self._db_conn.commit()
             self._cabinet_info = {
                 r["cabinet_id"]: r.get("description", r["cabinet_id"])
                 for r in db.get_cabinets(self._db_conn)
