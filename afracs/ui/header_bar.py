@@ -4,7 +4,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtWidgets import QHBoxLayout, QLabel, QVBoxLayout, QWidget
 
-from afracs import config, theme
+from afracs import config
 from afracs.ui.typing_label import TypingLabel
 
 LOGO_SIZE = 44
@@ -56,9 +56,3 @@ class HeaderBar(QWidget):
         layout.addLayout(title_box, stretch=1)
 
         layout.addWidget(_logo("afracs_logo.png"))
-
-        # Lock header height so the sleep page body always gets the same available height.
-        # Without this, TypingLabel text changes cause the header to breathe ±1px,
-        # which shifts stretch distribution and makes the clock visibly jump in size.
-        _text_h = theme.FontSize.HEADER_TITLE + 4 + theme.FontSize.HEADER_SUBTITLE
-        self.setFixedHeight(20 + max(LOGO_SIZE, _text_h))

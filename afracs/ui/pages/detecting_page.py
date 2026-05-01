@@ -42,7 +42,7 @@ class _CameraView(QWidget):
         if self._pixmap is not None:
             scaled = self._pixmap.scaled(
                 self.size(),
-                Qt.AspectRatioMode.KeepAspectRatioByExpanding,
+                Qt.AspectRatioMode.KeepAspectRatio,
                 Qt.TransformationMode.SmoothTransformation,
             )
             x = (self.width() - scaled.width()) // 2
