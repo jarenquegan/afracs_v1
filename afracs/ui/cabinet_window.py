@@ -192,7 +192,7 @@ class CabinetWindow(QMainWindow):
             return
 
         self._failed_attempts = 0
-        self._log_access(faculty["id"], "granted", f"Cabinet {cabinet_id}")
+        self._log_access(faculty["id"], "granted", cabinet_id=cabinet_id, note=f"Cabinet {cabinet_id}")
         self._fire_lock(cabinet_id)
         self.set_state(
             State.GRANTED,
@@ -243,11 +243,11 @@ class CabinetWindow(QMainWindow):
         except Exception as exc:
             log.warning("Could not load cabinet info: %s", exc)
 
-    def _log_access(self, faculty_id: int | None, status: str, note: str = "") -> None:
+    def _log_access(self, faculty_id: int | None, status: str, cabinet_id: str = "", note: str = "") -> None:
         try:
             if self._db_conn is None or not self._db_conn.open:
                 self._db_conn = db.connect()
-            db.log_access(self._db_conn, faculty_id, note.replace("Cabinet ", "") or config.CABINET_NAME, status, note)
+            db.log_access(self._db_conn, faculty_id, cabinet_id or config.CABINET_NAME, status, note)
         except Exception as exc:
             log.warning("Could not log access event: %s", exc)
 
@@ -324,12 +324,12 @@ class CabinetWindow(QMainWindow):
             if self._match_streak >= config.RECOGNITION_STREAK:
                 accessible = [c for c in result.cabinets]
                 if not accessible:
-                    self._log_access(result.faculty_id, "denied", "No cabinet access assigned")
+                    self._log_access(result.faculty_id, "denied", note="No cabinet access assigned")
                     self.set_state(State.DENIED, attempt=self._failed_attempts, reason="no_cabinet")
                 elif len(accessible) == 1:
                     self._failed_attempts = 0
                     cabinet_id = accessible[0]
-                    self._log_access(result.faculty_id, "granted", f"Cabinet {cabinet_id}")
+                    self._log_access(result.faculty_id, "granted", cabinet_id=cabinet_id, note=f"Cabinet {cabinet_id}")
                     self._fire_lock(cabinet_id)
                     self.set_state(
                         State.GRANTED,
@@ -358,7 +358,7 @@ class CabinetWindow(QMainWindow):
             self._no_match_frames += 1
             if self._no_match_frames >= config.UNRECOGNISED_DENY_FRAMES:
                 self._failed_attempts += 1
-                self._log_access(None, "denied", f"confidence={result.confidence:.3f}")
+                self._log_access(None, "denied", note=f"confidence={result.confidence:.3f}")
                 self.set_state(State.DENIED, attempt=self._failed_attempts)
 
     def _after_denied(self) -> None:
