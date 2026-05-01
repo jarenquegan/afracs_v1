@@ -223,23 +223,28 @@ def update_faculty_cabinets(conn, faculty_id: int, cabinet_ids: list[str]) -> No
 def log_access(
     conn,
     faculty_id: int | None,
-    cabinet_id: str,
+    cabinet_id: str | None,
     status: str,
     note: str = "",
 ) -> None:
     import logging as _logging
     _log = _logging.getLogger(__name__)
-    with conn.cursor() as cur:
-        cur.execute("SELECT id FROM cabinets WHERE cabinet_id = %s", (cabinet_id,))
-        cabinet = cur.fetchone()
-        if not cabinet:
-            _log.error("log_access: cabinet_id %r not found in cabinets table — skipping insert", cabinet_id)
-            return
 
+    resolved_cabinet_pk: int | None = None
+    if cabinet_id:
+        with conn.cursor() as cur:
+            cur.execute("SELECT id FROM cabinets WHERE cabinet_id = %s", (cabinet_id,))
+            cabinet = cur.fetchone()
+        if cabinet:
+            resolved_cabinet_pk = cabinet["id"]
+        else:
+            _log.warning("log_access: cabinet_id %r not found — logging without cabinet", cabinet_id)
+
+    with conn.cursor() as cur:
         cur.execute(
             "INSERT INTO access_logs (faculty_id, cabinet_id, status, note) "
             "VALUES (%s, %s, %s, %s)",
-            (faculty_id, cabinet["id"], status, note or None),
+            (faculty_id, resolved_cabinet_pk, status, note or None),
         )
     conn.commit()
 
