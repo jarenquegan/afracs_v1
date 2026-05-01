@@ -44,10 +44,10 @@ class DeniedPage(QWidget):
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         body.addWidget(title)
 
-        sub = QLabel("Face not recognized")
-        sub.setObjectName("stateBody")
-        sub.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        body.addWidget(sub)
+        self.sub = QLabel("Face not recognized")
+        self.sub.setObjectName("stateBody")
+        self.sub.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        body.addWidget(self.sub)
 
         body.addSpacing(12)
 
@@ -80,9 +80,15 @@ class DeniedPage(QWidget):
         self._tick_timer = QTimer(self)
         self._tick_timer.timeout.connect(self._tick)
 
-    def enter(self, *, attempt: int = 1, **_ctx) -> None:
-        max_attempts = config.ALERT_AFTER_FAILED_ATTEMPTS
-        self.attempt_meta.setText(f"Attempt {attempt} of {max_attempts}")
+    def enter(self, *, attempt: int = 1, reason: str = "unknown", **_ctx) -> None:
+        if reason == "no_cabinet":
+            self.sub.setText("Face recognized — no cabinet access assigned")
+            self.attempt_meta.hide()
+        else:
+            self.sub.setText("Face not recognized")
+            max_attempts = config.ALERT_AFTER_FAILED_ATTEMPTS
+            self.attempt_meta.setText(f"Attempt {attempt} of {max_attempts}")
+            self.attempt_meta.show()
         self._remaining = AUTO_RETURN_SECONDS
         self._refresh_countdown()
         self._tick_timer.start(1000)

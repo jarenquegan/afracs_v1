@@ -319,9 +319,8 @@ class CabinetWindow(QMainWindow):
             if self._match_streak >= config.RECOGNITION_STREAK:
                 accessible = [c for c in result.cabinets]
                 if not accessible:
-                    self._failed_attempts += 1
                     self._log_access(result.faculty_id, "denied", "No cabinet access assigned")
-                    self.set_state(State.DENIED, attempt=self._failed_attempts)
+                    self.set_state(State.DENIED, attempt=self._failed_attempts, reason="no_cabinet")
                 elif len(accessible) == 1:
                     self._failed_attempts = 0
                     cabinet_id = accessible[0]
