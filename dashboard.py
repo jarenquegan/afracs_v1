@@ -386,4 +386,5 @@ def logs():
 
 
 if __name__ == "__main__":
-    app.run(host=config.FLASK_HOST, port=config.FLASK_PORT, debug=True)
+    # HTTPS required so browsers allow camera access (navigator.mediaDevices) on LAN
+    app.run(host=config.FLASK_HOST, port=config.FLASK_PORT, debug=True, ssl_context="adhoc")
