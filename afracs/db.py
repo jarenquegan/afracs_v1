@@ -227,10 +227,13 @@ def log_access(
     status: str,
     note: str = "",
 ) -> None:
+    import logging as _logging
+    _log = _logging.getLogger(__name__)
     with conn.cursor() as cur:
         cur.execute("SELECT id FROM cabinets WHERE cabinet_id = %s", (cabinet_id,))
         cabinet = cur.fetchone()
         if not cabinet:
+            _log.error("log_access: cabinet_id %r not found in cabinets table — skipping insert", cabinet_id)
             return
 
         cur.execute(

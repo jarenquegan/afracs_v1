@@ -244,12 +244,16 @@ class CabinetWindow(QMainWindow):
             log.warning("Could not load cabinet info: %s", exc)
 
     def _log_access(self, faculty_id: int | None, status: str, cabinet_id: str = "", note: str = "") -> None:
+        target_cabinet = cabinet_id or config.CABINET_NAME
         try:
-            if self._db_conn is None or not self._db_conn.open:
-                self._db_conn = db.connect()
-            db.log_access(self._db_conn, faculty_id, cabinet_id or config.CABINET_NAME, status, note)
+            conn = db.connect()
+            try:
+                db.log_access(conn, faculty_id, target_cabinet, status, note)
+            finally:
+                conn.close()
         except Exception as exc:
-            log.warning("Could not log access event: %s", exc)
+            log.error("Could not log access event (faculty=%s cabinet=%s status=%s): %s",
+                      faculty_id, target_cabinet, status, exc)
 
     def _init_locks(self) -> None:
         if self._lock_bank is not None or not config.CABINET_LOCK_PINS:
@@ -411,6 +415,12 @@ class CabinetWindow(QMainWindow):
 
 
 def main() -> int:
+    import logging as _logging
+    _logging.basicConfig(
+        level=_logging.INFO,
+        format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+    )
+
     app = QApplication(sys.argv)
 
     screen = app.primaryScreen()
