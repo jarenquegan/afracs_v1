@@ -95,7 +95,7 @@ QPushButton#adminButton:hover {{
 }}
 
 /* DETECTING page */
-QLabel#cameraView {{
+QWidget#cameraView {{
     background: black;
     color: {T.GOLD};
     font-size: {FS.BANNER}px;
@@ -229,6 +229,3 @@ QLabel#statusBarDateTime {{
     letter-spacing: 0.5px;
 }}
 """
-
-
-CABINET_QSS = make_qss()

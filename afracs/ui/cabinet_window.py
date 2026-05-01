@@ -376,7 +376,7 @@ class CabinetWindow(QMainWindow):
 
     def _toggle_fullscreen(self) -> None:
         if self.isFullScreen():
-            self.showNormal()
+            self.showMaximized()
         else:
             self.showFullScreen()
 
@@ -414,7 +414,7 @@ def main() -> int:
     app.setFont(QFont(family, base_font_size))
 
     win = CabinetWindow()
-    win.showMaximized()
+    win.showFullScreen()
     return app.exec()
 
 
