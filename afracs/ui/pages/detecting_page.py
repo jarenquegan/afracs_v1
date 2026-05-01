@@ -5,6 +5,8 @@ from PyQt6.QtCore import Qt, QSize, QTimer, pyqtSignal
 from PyQt6.QtGui import QColor, QImage, QPainter, QPixmap
 from PyQt6.QtWidgets import QSizePolicy, QVBoxLayout, QWidget
 
+from afracs import theme
+
 IDLE_TIMEOUT_MS = 15_000
 
 
@@ -24,7 +26,7 @@ class _CameraView(QWidget):
         self._text = "Initializing camera…"
 
     def show_frame(self, frame) -> None:
-        rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        rgb = cv2.cvtColor(cv2.flip(frame, 1), cv2.COLOR_BGR2RGB)
         h, w, _ = rgb.shape
         img = QImage(rgb.data, w, h, w * 3, QImage.Format.Format_RGB888).copy()
         self._pixmap = QPixmap.fromImage(img)
@@ -38,7 +40,7 @@ class _CameraView(QWidget):
 
     def paintEvent(self, _event) -> None:
         painter = QPainter(self)
-        painter.fillRect(self.rect(), QColor("#000000"))
+        painter.fillRect(self.rect(), QColor(theme.MAROON_DARKEST))
         if self._pixmap is not None:
             scaled = self._pixmap.scaled(
                 self.size(),
@@ -49,7 +51,7 @@ class _CameraView(QWidget):
             y = (self.height() - scaled.height()) // 2
             painter.drawPixmap(x, y, scaled)
         elif self._text:
-            painter.setPen(QColor("#D4B356"))
+            painter.setPen(QColor(theme.GOLD))
             painter.drawText(self.rect(), Qt.AlignmentFlag.AlignCenter, self._text)
 
     def sizeHint(self) -> QSize:

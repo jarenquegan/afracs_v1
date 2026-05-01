@@ -59,7 +59,7 @@ QPushButton#sleepWakeButton {{
     font-weight: {FW.SEMIBOLD};
     padding: 14px 44px;
     border: none;
-    border-radius: {R.PILL}px;
+    border-radius: {R.LG}px;
     letter-spacing: 2px;
 }}
 QPushButton#sleepWakeButton:hover {{
