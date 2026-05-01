@@ -3,6 +3,8 @@
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal
 from PyQt6.QtWidgets import QLabel, QVBoxLayout, QWidget
 
+from afracs.ui.clock import StableLabel
+
 from afracs import config
 
 COOLDOWN_SECONDS = 60
@@ -49,7 +51,7 @@ class AlertPage(QWidget):
 
         body.addSpacing(12)
 
-        self.cooldown_label = QLabel()
+        self.cooldown_label = StableLabel()
         self.cooldown_label.setObjectName("stateMeta")
         self.cooldown_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         body.addWidget(self.cooldown_label)

@@ -5,6 +5,8 @@ from datetime import datetime
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal
 from PyQt6.QtWidgets import QLabel, QVBoxLayout, QWidget
 
+from afracs.ui.clock import StableLabel
+
 AUTO_RETURN_SECONDS = 3
 
 
@@ -47,7 +49,7 @@ class GrantedPage(QWidget):
         self.meta.setAlignment(Qt.AlignmentFlag.AlignCenter)
         body.addWidget(self.meta)
 
-        self.countdown = QLabel()
+        self.countdown = StableLabel()
         self.countdown.setObjectName("stateCountdown")
         self.countdown.setAlignment(Qt.AlignmentFlag.AlignCenter)
         body.addWidget(self.countdown)

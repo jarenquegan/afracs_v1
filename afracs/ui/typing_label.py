@@ -1,7 +1,8 @@
 """QLabel that types and erases through a list of strings."""
 
 from PyQt6.QtCore import QTimer
-from PyQt6.QtWidgets import QLabel
+
+from afracs.ui.clock import StableLabel
 
 TYPE_INTERVAL_MS = 80
 ERASE_INTERVAL_MS = 45
@@ -9,7 +10,7 @@ HOLD_FULL_MS = 6_000
 HOLD_EMPTY_MS = 900
 
 
-class TypingLabel(QLabel):
+class TypingLabel(StableLabel):
     def __init__(self, strings: list[str], parent=None) -> None:
         super().__init__(parent)
         self._strings = list(strings)

@@ -1,8 +1,6 @@
 """SLEEP state widget: lockscreen with clock, date, tap-to-wake, status dots."""
 
-from datetime import datetime
-
-from PyQt6.QtCore import Qt, QTimer, pyqtSignal
+from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import (
     QHBoxLayout,
     QLabel,
@@ -12,6 +10,7 @@ from PyQt6.QtWidgets import (
 )
 
 from afracs import config
+from afracs.ui.clock import ClockLabel, DateLabel, StableLabel
 
 
 class SleepPage(QWidget):
@@ -32,14 +31,12 @@ class SleepPage(QWidget):
         body_layout.setSpacing(12)
         body_layout.addStretch(1)
 
-        self.clock = QLabel()
+        self.clock = ClockLabel("%H:%M")
         self.clock.setObjectName("sleepClock")
-        self.clock.setAlignment(Qt.AlignmentFlag.AlignCenter)
         body_layout.addWidget(self.clock)
 
-        self.date = QLabel()
+        self.date = DateLabel("%A, %B %d, %Y")
         self.date.setObjectName("sleepDate")
-        self.date.setAlignment(Qt.AlignmentFlag.AlignCenter)
         body_layout.addWidget(self.date)
 
         body_layout.addSpacing(36)
@@ -56,7 +53,7 @@ class SleepPage(QWidget):
 
         body_layout.addStretch(2)
 
-        self.status_dot = QLabel()
+        self.status_dot = StableLabel()
         self.status_dot.setObjectName("statusDot")
         self.status_dot.setAlignment(Qt.AlignmentFlag.AlignCenter)
         body_layout.addWidget(self.status_dot)
@@ -73,22 +70,12 @@ class SleepPage(QWidget):
         admin_row.addWidget(self.admin_button)
         outer.addLayout(admin_row)
 
-        self._tick()
-        self._timer = QTimer(self)
-        self._timer.timeout.connect(self._tick)
-        self._timer.start(1000)
-
         self._lock_secured = True
         self._system_online = True
         self._refresh_status_dot()
 
     def _on_admin_clicked(self) -> None:
         self.admin_requested.emit()
-
-    def _tick(self) -> None:
-        now = datetime.now()
-        self.clock.setText(now.strftime("%H:%M"))
-        self.date.setText(now.strftime("%A, %B %d, %Y"))
 
     def set_lock_secured(self, secured: bool) -> None:
         self._lock_secured = secured
@@ -110,7 +97,7 @@ class SleepPage(QWidget):
         super().mousePressEvent(event)
 
     def enter(self, **_ctx) -> None:
-        self._tick()
+        pass
 
     def leave(self) -> None:
         pass

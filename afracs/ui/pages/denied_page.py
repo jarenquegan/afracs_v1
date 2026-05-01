@@ -9,6 +9,8 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from afracs.ui.clock import StableLabel
+
 from afracs import config
 
 AUTO_RETURN_SECONDS = 2
@@ -54,7 +56,7 @@ class DeniedPage(QWidget):
         self.attempt_meta.setAlignment(Qt.AlignmentFlag.AlignCenter)
         body.addWidget(self.attempt_meta)
 
-        self.countdown = QLabel()
+        self.countdown = StableLabel()
         self.countdown.setObjectName("stateCountdown")
         self.countdown.setAlignment(Qt.AlignmentFlag.AlignCenter)
         body.addWidget(self.countdown)

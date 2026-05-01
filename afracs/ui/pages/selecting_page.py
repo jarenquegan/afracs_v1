@@ -9,6 +9,8 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from afracs.ui.clock import StableLabel
+
 IDLE_SECONDS = 30
 
 
@@ -61,7 +63,7 @@ class SelectingPage(QWidget):
 
         body.addSpacing(6)
 
-        self._countdown_lbl = QLabel()
+        self._countdown_lbl = StableLabel()
         self._countdown_lbl.setObjectName("stateCountdown")
         self._countdown_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         body.addWidget(self._countdown_lbl)

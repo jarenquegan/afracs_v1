@@ -147,6 +147,8 @@ class CabinetWindow(QMainWindow):
             ("Escape", lambda: self.set_state(State.SLEEP)),
             ("L", self._toggle_lock_indicator),
             ("F11", self._toggle_fullscreen),
+            ("Ctrl+Q", self.close),
+            ("Ctrl+Shift+Q", self.close),
         ]:
             shortcut = QShortcut(QKeySequence(key), self)
             shortcut.activated.connect(handler)
