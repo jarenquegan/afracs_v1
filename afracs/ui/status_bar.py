@@ -1,7 +1,7 @@
 """Persistent bottom status bar."""
 
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QHBoxLayout, QLabel, QWidget
+from PyQt6.QtWidgets import QHBoxLayout, QLabel, QSizePolicy, QWidget
 
 from afracs import config
 from afracs.ui.clock import ClockLabel
@@ -46,6 +46,9 @@ class StatusBar(QWidget):
         self._tip = TypingLabel(_TIPS)
         self._tip.setObjectName("statusBarTip")
         self._tip.setAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft)
+        # Ignored width: layout owns the tip's width via stretch. Without this,
+        # longer tip text would shrink the info/datetime labels next to it.
+        self._tip.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
         layout.addWidget(self._tip, stretch=1)
 
         layout.addWidget(_sep())

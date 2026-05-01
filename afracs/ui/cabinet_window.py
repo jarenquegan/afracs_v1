@@ -271,6 +271,10 @@ class CabinetWindow(QMainWindow):
             self._cap = None
             self.detecting_page.show_unavailable()
             return
+        # Request 16:9 to fill widescreen without letterboxing.
+        # If the camera doesn't support it, it falls back to its native resolution.
+        self._cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+        self._cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
         self._frame_timer.start(33)
 
     def _close_camera(self) -> None:
