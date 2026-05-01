@@ -11,8 +11,8 @@ DANGER_RED      = "#B00020"
 DANGER_RED_DARK = "#7A0016"
 SURFACE_DIM     = "#2A0100"
 
-FONT_FAMILY    = "Helvetica Neue"
-FONT_FALLBACKS = "Helvetica, 'DejaVu Sans', Arial, sans-serif"
+FONT_FAMILY    = "Geist"
+FONT_FALLBACKS = "'Helvetica Neue', Helvetica, 'DejaVu Sans', Arial, sans-serif"
 FONT_STACK     = f"'{FONT_FAMILY}', {FONT_FALLBACKS}"
 
 

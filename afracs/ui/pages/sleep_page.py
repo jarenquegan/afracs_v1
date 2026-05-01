@@ -1,4 +1,4 @@
-"""SLEEP state widget: lockscreen with clock, date, tap-to-wake, status dots."""
+"""SLEEP state widget: lockscreen with clock, date, tap-to-wake."""
 
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import (
@@ -8,8 +8,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from afracs import config
-from afracs.ui.clock import ClockLabel, DateLabel, StableLabel
+from afracs.ui.clock import ClockLabel, DateLabel
 
 
 class SleepPage(QWidget):
@@ -51,12 +50,6 @@ class SleepPage(QWidget):
         body_layout.addLayout(button_row)
 
         body_layout.addStretch(2)
-
-        self.status_dot = StableLabel()
-        self.status_dot.setObjectName("statusDot")
-        self.status_dot.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        body_layout.addWidget(self.status_dot)
-
         outer.addWidget(body, stretch=1)
 
         admin_row = QHBoxLayout()
@@ -69,27 +62,14 @@ class SleepPage(QWidget):
         admin_row.addWidget(self.admin_button)
         outer.addLayout(admin_row)
 
-        self._lock_secured = True
-        self._system_online = True
-        self._refresh_status_dot()
-
     def _on_admin_clicked(self) -> None:
         self.admin_requested.emit()
 
     def set_lock_secured(self, secured: bool) -> None:
-        self._lock_secured = secured
-        self._refresh_status_dot()
+        pass
 
     def set_system_online(self, online: bool) -> None:
-        self._system_online = online
-        self._refresh_status_dot()
-
-    def _refresh_status_dot(self) -> None:
-        lock = "Secured" if self._lock_secured else "Open"
-        sys_state = "Online" if self._system_online else "Offline"
-        self.status_dot.setText(
-            f"●  {config.CABINET_NAME}    ●  {lock}    ●  {sys_state}"
-        )
+        pass
 
     def mousePressEvent(self, event) -> None:
         self.wake_requested.emit()

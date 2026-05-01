@@ -4,7 +4,7 @@
 
 @layer base {
   body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: 'Geist Variable', 'Geist', 'Helvetica Neue', Arial, sans-serif;
     @apply bg-gray-50 text-gray-800 antialiased;
   }
   *, *::before, *::after { box-sizing: border-box; }

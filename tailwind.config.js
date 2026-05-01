@@ -18,7 +18,7 @@ module.exports = {
         },
       },
       fontFamily: {
-        sans: ["'Helvetica Neue'", 'Helvetica', 'Arial', 'sans-serif'],
+        sans: ["'Geist Variable'", "'Geist'", "'Helvetica Neue'", 'Arial', 'sans-serif'],
       },
     },
   },

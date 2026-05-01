@@ -70,14 +70,6 @@ QPushButton#sleepWakeButton:pressed {{
     padding-top: 16px;
     padding-bottom: 12px;
 }}
-QLabel#statusDot {{
-    color: {T.GOLD_DARK};
-    font-size: {FS.STATUS_DOT}px;
-    font-weight: {FW.REGULAR};
-    letter-spacing: 0.6px;
-    padding: 0 {SP.SM}px {SP.MD}px {SP.SM}px;
-    background: transparent;
-}}
 QPushButton#adminButton {{
     background: transparent;
     color: rgba(255,255,255,0.30);
