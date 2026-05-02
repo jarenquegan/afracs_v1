@@ -12,26 +12,48 @@ class Buzzer:
         # We use PWM to "drive" the buzzer at a specific frequency
         self._device = PWMOutputDevice(pin, initial_value=0, frequency=config.BUZZER_FREQUENCY)
 
-    def _beep(self, n: int, duration: float = 0.1) -> None:
+    def _beep(self, n: int, duration: float = 0.1, duty: float = 0.5) -> None:
         def run():
             for _ in range(n):
-                self._device.value = 0.5  # 50% duty cycle creates the square wave
+                self._device.value = duty
                 time.sleep(duration)
                 self._device.value = 0
                 time.sleep(duration)
         threading.Thread(target=run, daemon=True).start()
 
+    def _siren(self, loops: int = 1) -> None:
+        """Sweeps frequency to create a louder, more piercing sound."""
+        def run():
+            orig_freq = self._device.frequency
+            for _ in range(loops):
+                # Sweep from 2000Hz to 4000Hz
+                for f in range(2000, 4001, 200):
+                    self._device.frequency = f
+                    self._device.value = 0.6
+                    time.sleep(0.02)
+            self._device.value = 0
+            self._device.frequency = orig_freq
+        threading.Thread(target=run, daemon=True).start()
+
     def success(self) -> None:
-        """One medium beep."""
-        self._beep(n=1, duration=0.15)
+        """One sharp, high-pitched beep."""
+        self._beep(n=1, duration=0.2, duty=0.7)
 
     def failure(self) -> None:
-        """Two quick sharp beeps."""
-        self._beep(n=2, duration=0.08)
+        """A quick low-high 'thump' sound."""
+        def run():
+            self._device.frequency = 1500
+            self._device.value = 0.8
+            time.sleep(0.1)
+            self._device.frequency = 3500
+            self._device.value = 0.8
+            time.sleep(0.1)
+            self._device.value = 0
+        threading.Thread(target=run, daemon=True).start()
 
     def alert(self) -> None:
-        """Fast rapid beeps."""
-        self._beep(n=10, duration=0.05)
+        """The loudest siren effect."""
+        self._siren(loops=5)
 
     def close(self) -> None:
         self._device.close()
