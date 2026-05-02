@@ -9,10 +9,10 @@
 {% block topbar_title %}Admins{% endblock %}
 
 {% block content %}
-<div class="flex items-center gap-3 mb-4">
+<div class="flex items-center gap-3 h-10 mb-4">
   <h4 class="page-header mb-0 flex-1">System Administrators</h4>
   <input id="admin-search" type="text" placeholder="Search admins…"
-         class="search-input px-3 py-2 text-sm border border-gray-200 rounded-lg w-56">
+         class="search-input px-3 h-10 text-sm border border-gray-200 rounded-lg w-56">
   <a href="{{ url_for('admin_add') }}" class="btn-primary whitespace-nowrap">
     + Add Admin
   </a>

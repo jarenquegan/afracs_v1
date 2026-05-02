@@ -147,7 +147,7 @@ class CabinetWindow(QMainWindow):
             ("T", self.wake),
             ("G", lambda: self._dev_grant()),
             ("D", lambda: self._dev_deny()),
-            ("A", lambda: self.set_state(State.ALERT)),
+            ("A", lambda: (self._beep_alert(), self.set_state(State.ALERT))),
             ("S", lambda: self.set_state(State.SLEEP)),
             ("Escape", lambda: self.set_state(State.SLEEP)),
             ("L", self._toggle_lock_indicator),
