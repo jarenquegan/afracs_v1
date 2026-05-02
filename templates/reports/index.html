@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{% block title %}Report Generator — AFRACS Admin{% endblock %}
+
+{% block topbar_icon %}
+<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+  <path fill-rule="evenodd" d="M2.5 3A1.5 1.5 0 0 0 1 4.5v11A1.5 1.5 0 0 0 2.5 17h15a1.5 1.5 0 0 0 1.5-1.5v-11A1.5 1.5 0 0 0 17.5 3h-15Zm4 3.5a.75.75 0 0 0-.75.75v5a.75.75 0 0 0 1.5 0v-5a.75.75 0 0 0-.75-.75Zm3 2.5a.75.75 0 0 0-.75.75v2.5a.75.75 0 0 0 1.5 0v-2.5a.75.75 0 0 0-.75-.75Zm3-4.5a.75.75 0 0 0-.75.75v9.5a.75.75 0 0 0 1.5 0v-9.5a.75.75 0 0 0-.75-.75Z" clip-rule="evenodd" />
+</svg>
+{% endblock %}
+{% block topbar_title %}Report Generator{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between h-10 mb-4">
+  <h4 class="page-header mb-0">Generate Report</h4>
+</div>
+
+<div class="card p-6 mb-6">
+  <form method="get" action="{{ url_for('reports') }}">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <!-- Date Range -->
+      <div>
+        <label class="form-label">Date Range</label>
+        <div class="flex items-center gap-2">
+          <input type="date" name="start_date" class="form-input text-xs p-2" value="{{ args.get('start_date', '') }}">
+          <span class="text-gray-400 text-xs">to</span>
+          <input type="date" name="end_date" class="form-input text-xs p-2" value="{{ args.get('end_date', '') }}">
+        </div>
+      </div>
+
+      <!-- Time Range -->
+      <div>
+        <label class="form-label">Time Range</label>
+        <div class="flex items-center gap-2">
+          <input type="time" name="start_time" class="form-input text-xs p-2" value="{{ args.get('start_time', '') }}">
+          <span class="text-gray-400 text-xs">to</span>
+          <input type="time" name="end_time" class="form-input text-xs p-2" value="{{ args.get('end_time', '') }}">
+        </div>
+      </div>
+
+      <!-- Faculty -->
+      <div>
+        <label class="form-label">Faculty Member</label>
+        <select name="faculty_id" class="form-input text-xs p-2">
+          <option value="">All Faculty</option>
+          {% for f in faculty %}
+            <option value="{{ f.id }}" {% if args.get('faculty_id')|string == f.id|string %}selected{% endif %}>
+              {{ f.name }} ({{ f.id_number }})
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Cabinet -->
+      <div>
+        <label class="form-label">Cabinet</label>
+        <select name="cabinet_id" class="form-input text-xs p-2">
+          <option value="">All Cabinets</option>
+          {% for cab in cabinets %}
+            <option value="{{ cab.id }}" {% if args.get('cabinet_id')|string == cab.id|string %}selected{% endif %}>
+              Cabinet {{ cab.cabinet_id }} - {{ cab.description }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Status -->
+      <div>
+        <label class="form-label">Access Status</label>
+        <select name="status" class="form-input text-xs p-2">
+          <option value="">All Statuses</option>
+          <option value="granted" {% if args.get('status') == 'granted' %}selected{% endif %}>Granted</option>
+          <option value="denied" {% if args.get('status') == 'denied' %}selected{% endif %}>Denied</option>
+        </select>
+      </div>
+      
+      <!-- Actions -->
+      <div class="flex items-end gap-2">
+        <button type="submit" class="btn-primary py-2 px-6 w-full justify-center">Generate Preview</button>
+        <a href="{{ url_for('reports') }}" class="btn-secondary py-2 px-4 whitespace-nowrap">Clear</a>
+      </div>
+    </div>
+  </form>
+</div>
+
+{% if request.args %}
+<div class="card" style="overflow: visible;">
+  <div class="flex items-center justify-between p-4 border-b border-gray-100">
+    <div>
+      <h3 class="font-bold text-gray-800">Preview Results</h3>
+      <p class="text-xs text-gray-500">{{ logs|length }} record(s) found</p>
+    </div>
+    {% if logs %}
+    <div class="flex gap-2">
+      <!-- Build the query string so export links keep the filters -->
+      {% set qs = [] %}
+      {% for k, v in args.items() %}{% if v %}{% set _ = qs.append(k ~ '=' ~ v) %}{% endif %}{% endfor %}
+      {% set query_str = qs|join('&') %}
+      
+      <a href="{{ url_for('reports_print') }}?{{ query_str }}" target="_blank" class="btn-secondary">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M5 2.5a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h10a.5.5 0 0 0 .5-.5V3a.5.5 0 0 0-.5-.5H5ZM4 7.5a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h1v1.5A1.5 1.5 0 0 0 6.5 18.5h7a1.5 1.5 0 0 0 1.5-1.5V15.5h1a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2H4Zm11 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0Zm-8.5 4.5v-3h7v3h-7Z" clip-rule="evenodd" />
+        </svg>
+        Print PDF
+      </a>
+      <a href="{{ url_for('reports_export') }}?{{ query_str }}" class="btn-primary">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 3a.75.75 0 0 1 .75.75v7.69l2.72-2.72a.75.75 0 1 1 1.06 1.06l-4 4a.75.75 0 0 1-1.06 0l-4-4a.75.75 0 1 1 1.06-1.06l2.72 2.72V3.75A.75.75 0 0 1 10 3Zm-6.5 12A1.5 1.5 0 0 1 5 13.5v-1a.75.75 0 0 1 1.5 0v1a.25.25 0 0 0 .25.25h6.5a.25.25 0 0 0 .25-.25v-1a.75.75 0 0 1 1.5 0v1A1.5 1.5 0 0 1 13.5 16.5h-6.5Z" clip-rule="evenodd" />
+        </svg>
+        Export CSV
+      </a>
+    </div>
+    {% endif %}
+  </div>
+
+  <div style="overflow: visible;">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          <th>Faculty</th>
+          <th>ID Number</th>
+          <th>Cabinet</th>
+          <th>Status</th>
+          <th>Note</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in logs %}
+        <tr>
+          <td class="text-gray-400 text-xs whitespace-nowrap">{{ log.timestamp.strftime('%b %d, %Y %I:%M %p') }}</td>
+          <td class="font-semibold">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-full bg-maroon/10 text-maroon flex items-center justify-center text-xs flex-shrink-0 font-bold">
+                {{ log.faculty_name[:2].upper() if log.faculty_name else '?' }}
+              </div>
+              {{ log.faculty_name or '<em class="text-gray-400 font-normal">Unknown</em>' | safe }}
+            </div>
+          </td>
+          <td class="text-gray-400 text-xs">{{ log.id_number or '—' }}</td>
+          <td><span class="badge badge-cabinet">{{ log.cabinet or '?' }}</span></td>
+          <td>
+            {% if log.status == 'granted' %}
+              <span class="status-granted">Granted</span>
+            {% else %}
+              <span class="status-denied">Denied</span>
+            {% endif %}
+          </td>
+          <td class="text-gray-400 text-xs">{{ log.note or '' }}</td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="6" class="text-center text-gray-400 py-12">No records match your filters.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

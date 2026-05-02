@@ -16,7 +16,7 @@ from flask import (
     session,
     url_for,
 )
-from werkzeug.security import check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 
 from afracs import config, db
 
@@ -32,6 +32,15 @@ def _get_face_engine():
         from afracs.recognition import FaceEngine
         _face_engine = FaceEngine()
     return _face_engine
+
+
+def _get_pi_temp() -> str:
+    try:
+        with open("/sys/class/thermal/thermal_zone0/temp", "r") as f:
+            temp = float(f.read().strip()) / 1000.0
+            return f"{temp:.1f}°C"
+    except Exception:
+        return "38.5°C (Simulated)"
 
 
 def _extract_face_from_form() -> bytes | None:
@@ -82,17 +91,19 @@ def close_db(exc):
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        username = request.form.get("username", "").strip()
+        identifier = request.form.get("username", "").strip()
         password = request.form.get("password", "")
         try:
             conn = get_db()
-            admin = db.get_admin_by_username(conn, username)
+            admin = db.get_admin_by_username_or_email(conn, identifier)
         except Exception:
             admin = None
 
         if admin and check_password_hash(admin["password_hash"], password):
             session["admin_id"] = admin["id"]
             session["admin_username"] = admin["username"]
+            session["admin_full_name"] = admin.get("full_name", "")
+            session["admin_email"] = admin.get("email", "")
             flash("Welcome back!", "success")
             return redirect(url_for("index"))
         flash("Invalid username or password.", "danger")
@@ -126,12 +137,44 @@ def index():
                ORDER BY al.timestamp DESC LIMIT 10"""
         )
         recent_logs = cur.fetchall()
+
+        # Fetch daily access counts for the last 7 days for the chart
+        cur.execute(
+            """SELECT DATE(timestamp) as date, status, COUNT(*) as count
+               FROM access_logs
+               WHERE timestamp >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+               GROUP BY DATE(timestamp), status
+               ORDER BY date ASC"""
+        )
+        daily_counts = cur.fetchall()
+
+        # Format chart data
+        import datetime
+        from datetime import timedelta
+        
+        today = datetime.date.today()
+        dates = [(today - timedelta(days=i)) for i in range(6, -1, -1)]
+        labels = [d.strftime("%b %d") for d in dates]
+        
+        # Map SQL results to dates
+        granted_dict = {row['date']: row['count'] for row in daily_counts if row['status'] == 'granted'}
+        denied_dict = {row['date']: row['count'] for row in daily_counts if row['status'] == 'denied'}
+        
+        data_granted = [granted_dict.get(d, 0) for d in dates]
+        data_denied = [denied_dict.get(d, 0) for d in dates]
+        
+        system_temp = _get_pi_temp()
+
     return render_template(
         "index.html",
         faculty_count=faculty_count,
         cabinet_count=cabinet_count,
         log_count=log_count,
+        system_temp=system_temp,
         recent_logs=recent_logs,
+        chart_labels=labels,
+        chart_data_granted=data_granted,
+        chart_data_denied=data_denied,
     )
 
 
@@ -383,6 +426,162 @@ def logs():
     rows, total = db.get_access_logs(get_db(), page=page, per_page=per_page)
     pages = (total + per_page - 1) // per_page
     return render_template("logs/list.html", logs=rows, page=page, pages=pages, total=total)
+
+
+@app.route("/reports")
+@login_required
+def reports():
+    conn = get_db()
+    cabinets = db.get_cabinets(conn)
+    faculty = db.get_all_faculty(conn)
+    
+    start_date = request.args.get("start_date", "")
+    end_date = request.args.get("end_date", "")
+    start_time = request.args.get("start_time", "")
+    end_time = request.args.get("end_time", "")
+    cabinet_id = request.args.get("cabinet_id", "")
+    faculty_id = request.args.get("faculty_id", "")
+    status = request.args.get("status", "")
+
+    logs = []
+    if request.args:
+        logs = db.get_filtered_logs(
+            conn,
+            start_date=start_date or None,
+            end_date=end_date or None,
+            start_time=start_time or None,
+            end_time=end_time or None,
+            cabinet_id=cabinet_id or None,
+            faculty_id=faculty_id or None,
+            status=status or None,
+        )
+
+    return render_template(
+        "reports/index.html",
+        cabinets=cabinets,
+        faculty=faculty,
+        logs=logs,
+        args=request.args,
+    )
+
+@app.route("/reports/export")
+@login_required
+def reports_export():
+    import csv
+    from io import StringIO
+    from flask import Response
+    
+    conn = get_db()
+    logs = db.get_filtered_logs(
+        conn,
+        start_date=request.args.get("start_date") or None,
+        end_date=request.args.get("end_date") or None,
+        start_time=request.args.get("start_time") or None,
+        end_time=request.args.get("end_time") or None,
+        cabinet_id=request.args.get("cabinet_id") or None,
+        faculty_id=request.args.get("faculty_id") or None,
+        status=request.args.get("status") or None,
+    )
+    
+    si = StringIO()
+    cw = csv.writer(si)
+    cw.writerow(['Timestamp', 'Faculty', 'ID Number', 'Cabinet', 'Status', 'Note'])
+    for log in logs:
+        cw.writerow([
+            log['timestamp'].strftime('%Y-%m-%d %H:%M:%S') if log['timestamp'] else '',
+            log['faculty_name'] or 'Unknown',
+            log['id_number'] or '',
+            log['cabinet'] or '?',
+            log['status'].upper(),
+            log['note'] or ''
+        ])
+    
+    output = si.getvalue()
+    return Response(
+        output,
+        mimetype="text/csv",
+        headers={"Content-Disposition": "attachment;filename=afracs_report.csv"}
+    )
+
+@app.route("/reports/print")
+@login_required
+def reports_print():
+    conn = get_db()
+    logs = db.get_filtered_logs(
+        conn,
+        start_date=request.args.get("start_date") or None,
+        end_date=request.args.get("end_date") or None,
+        start_time=request.args.get("start_time") or None,
+        end_time=request.args.get("end_time") or None,
+        cabinet_id=request.args.get("cabinet_id") or None,
+        faculty_id=request.args.get("faculty_id") or None,
+        status=request.args.get("status") or None,
+    )
+    return render_template("reports/print.html", logs=logs, args=request.args)
+
+@app.route("/admins")
+@login_required
+def admin_list():
+    admins = db.get_all_admins(get_db())
+    return render_template("admins/list.html", admins=admins)
+
+
+@app.route("/admins/add", methods=["GET", "POST"])
+@login_required
+def admin_add():
+    if request.method == "POST":
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
+        full_name = request.form.get("full_name", "").strip()
+        email = request.form.get("email", "").strip()
+        if not username or not password:
+            flash("Username and password are required.", "danger")
+        else:
+            try:
+                db.create_admin(get_db(), username, generate_password_hash(password), full_name, email)
+                flash(f"Admin {username} added.", "success")
+                return redirect(url_for("admin_list"))
+            except Exception as exc:
+                flash(f"Error: {exc}", "danger")
+    return render_template("admins/form.html", admin=None, action="Add")
+
+
+@app.route("/admins/<int:admin_id>/edit", methods=["GET", "POST"])
+@login_required
+def admin_edit(admin_id):
+    conn = get_db()
+    admin = db.get_admin_by_id(conn, admin_id)
+    if not admin:
+        flash("Admin not found.", "warning")
+        return redirect(url_for("admin_list"))
+
+    if request.method == "POST":
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
+        full_name = request.form.get("full_name", "").strip()
+        email = request.form.get("email", "").strip()
+        if not username:
+            flash("Username is required.", "danger")
+        else:
+            try:
+                pw_hash = generate_password_hash(password) if password else None
+                db.update_admin(conn, admin_id, username, full_name, email, pw_hash)
+                flash(f"Admin {username} updated.", "success")
+                return redirect(url_for("admin_list"))
+            except Exception as exc:
+                flash(f"Error: {exc}", "danger")
+    return render_template("admins/form.html", admin=admin, action="Edit")
+
+
+@app.route("/admins/<int:admin_id>/delete", methods=["POST"])
+@login_required
+def admin_delete(admin_id):
+    if admin_id == session.get("admin_id"):
+        flash("You cannot delete your own account.", "danger")
+    else:
+        db.delete_admin(get_db(), admin_id)
+        flash("Admin deleted.", "success")
+    return redirect(url_for("admin_list"))
 
 
 if __name__ == "__main__":

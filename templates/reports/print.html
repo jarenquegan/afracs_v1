@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AFRACS Report</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      color: #333;
+      font-size: 12px;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      border-bottom: 2px solid #900500;
+      padding-bottom: 20px;
+    }
+    .header h1 {
+      margin: 0;
+      color: #900500;
+      font-size: 24px;
+    }
+    .header p {
+      margin: 5px 0 0;
+      color: #666;
+    }
+    .filters {
+      margin-bottom: 20px;
+      padding: 15px;
+      background: #f9f9f9;
+      border: 1px solid #eee;
+    }
+    .filters p { margin: 3px 0; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px 12px;
+      text-align: left;
+    }
+    th {
+      background-color: #900500;
+      color: white;
+      font-weight: bold;
+    }
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    .status-granted { color: #059669; font-weight: bold; }
+    .status-denied { color: #dc2626; font-weight: bold; }
+    .print-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 10px 20px;
+      background: #900500;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    @media print {
+      .print-btn { display: none; }
+      body { margin: 0; }
+      @page { margin: 1cm; }
+    }
+  </style>
+</head>
+<body>
+
+  <button class="print-btn" onclick="window.print()">Print PDF</button>
+
+  <div class="header">
+    <h1>University of Cagayan Valley - College of Health</h1>
+    <p>AFRACS Access Report</p>
+  </div>
+
+  <div class="filters">
+    <strong>Filters Applied:</strong>
+    {% if args.get('start_date') or args.get('end_date') %}
+      <p>Date: {{ args.get('start_date') or 'Beginning' }} to {{ args.get('end_date') or 'End' }}</p>
+    {% endif %}
+    {% if args.get('start_time') or args.get('end_time') %}
+      <p>Time: {{ args.get('start_time') or '00:00' }} to {{ args.get('end_time') or '23:59' }}</p>
+    {% endif %}
+    {% if args.get('status') %}
+      <p>Status: {{ args.get('status')|capitalize }}</p>
+    {% endif %}
+    <p>Total Records: {{ logs|length }}</p>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Timestamp</th>
+        <th>Faculty Name</th>
+        <th>ID Number</th>
+        <th>Cabinet</th>
+        <th>Status</th>
+        <th>Note</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for log in logs %}
+      <tr>
+        <td>{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+        <td>{{ log.faculty_name or 'Unknown' }}</td>
+        <td>{{ log.id_number or '—' }}</td>
+        <td>{{ log.cabinet or '?' }}</td>
+        <td class="status-{{ log.status }}">{{ log.status|capitalize }}</td>
+        <td>{{ log.note or '' }}</td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="6" style="text-align: center; padding: 30px;">No records match your filters.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+</body>
+</html>

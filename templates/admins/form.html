@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}{{ action }} Admin — AFRACS Admin{% endblock %}
+
+{% block topbar_title %}{{ action }} Admin{% endblock %}
+
+{% block content %}
+<div class="flex items-center gap-2 h-10 mb-4">
+  <a href="{{ url_for('admin_list') }}" class="text-gray-400 text-sm hover:text-maroon">
+    ← Admins
+  </a>
+  <span class="text-gray-300">/</span>
+  <h4 class="page-header mb-0">{{ action }} Admin</h4>
+</div>
+
+<div class="card p-6 max-w-xl">
+  <form method="post" class="space-y-5">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <label class="form-label">Username <span class="text-red-500">*</span></label>
+        <input type="text" name="username" class="form-input"
+               value="{{ admin.username if admin else '' }}" required autofocus>
+      </div>
+      <div>
+        <label class="form-label">Full Name</label>
+        <input type="text" name="full_name" class="form-input"
+               value="{{ admin.full_name if admin else '' }}" placeholder="e.g. John Doe">
+      </div>
+    </div>
+
+    <div>
+      <label class="form-label">Email</label>
+      <input type="email" name="email" class="form-input"
+             value="{{ admin.email if admin else '' }}" placeholder="e.g. admin@ucv.edu.ph">
+    </div>
+
+    <div>
+      <label class="form-label">
+        Password
+        {% if action == 'Add' %}<span class="text-red-500">*</span>{% endif %}
+      </label>
+      <input type="password" name="password" class="form-input"
+             placeholder="{% if action == 'Edit' %}Leave blank to keep current{% else %}Min 8 characters{% endif %}"
+             {% if action == 'Add' %}required{% endif %}>
+    </div>
+
+    <div class="flex gap-2 pt-2 border-t border-gray-100">
+      <button type="submit" class="btn-primary">{{ action }} Admin</button>
+      <a href="{{ url_for('admin_list') }}" class="btn-secondary">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -4,12 +4,12 @@
 {% block topbar_title %}{{ action }} Faculty{% endblock %}
 
 {% block content %}
-<div class="flex items-center gap-2 mb-4">
+<div class="flex items-center gap-2 h-10 mb-4">
   <a href="{{ url_for('faculty_list') }}" class="text-gray-400 text-sm hover:text-maroon">
     ← Faculty
   </a>
   <span class="text-gray-300">/</span>
-  <h5 class="page-header mb-0 pb-0 border-0 text-base">{{ action }} Faculty</h5>
+  <h4 class="page-header mb-0">{{ action }} Faculty</h4>
 </div>
 
 <form method="post">

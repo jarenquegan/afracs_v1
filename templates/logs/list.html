@@ -10,7 +10,7 @@
 {% block topbar_title %}Access Logs{% endblock %}
 
 {% block content %}
-<div class="flex items-center justify-between mb-4">
+<div class="flex items-center justify-between h-10 mb-4">
   <h4 class="page-header mb-0">Access Logs</h4>
   <span class="text-gray-400 text-sm">{{ total }} total event{{ 's' if total != 1 }}</span>
 </div>
@@ -32,7 +32,14 @@
         {% for log in logs %}
         <tr>
           <td class="text-gray-400 text-xs whitespace-nowrap">{{ log.timestamp }}</td>
-          <td>{{ log.faculty_name or '<em class="text-gray-400">Unknown</em>' | safe }}</td>
+          <td class="font-semibold">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-full bg-maroon/10 text-maroon flex items-center justify-center text-xs flex-shrink-0 font-bold">
+                {{ log.faculty_name[:2].upper() if log.faculty_name else '?' }}
+              </div>
+              {{ log.faculty_name or '<em class="text-gray-400 font-normal">Unknown</em>' | safe }}
+            </div>
+          </td>
           <td class="text-gray-400 text-xs">{{ log.id_number or '—' }}</td>
           <td><span class="badge badge-cabinet">{{ log.cabinet or '?' }}</span></td>
           <td>

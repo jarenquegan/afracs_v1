@@ -1,18 +1,19 @@
 {% extends "base.html" %}
-{% block title %}Cabinets — AFRACS Admin{% endblock %}
+{% block title %}Admins — AFRACS Admin{% endblock %}
 
 {% block topbar_icon %}
 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
-  <path d="M2 3a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H2Z"/>
-  <path fill-rule="evenodd" d="M2 7.5h16l-.811 7.71a2 2 0 0 1-1.99 1.79H4.802a2 2 0 0 1-1.99-1.79L2 7.5ZM7 11a1 1 0 0 1 1-1h4a1 1 0 1 1 0 2H8a1 1 0 0 1-1-1Z" clip-rule="evenodd"/>
+  <path fill-rule="evenodd" d="M10 1a4.5 4.5 0 0 0-4.5 4.5V9H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-.5V5.5A4.5 4.5 0 0 0 10 1Zm3 8V5.5a3 3 0 1 0-6 0V9h6Z" clip-rule="evenodd" />
 </svg>
 {% endblock %}
-{% block topbar_title %}Cabinets{% endblock %}
+{% block topbar_title %}Admins{% endblock %}
 
 {% block content %}
 <div class="flex items-center justify-between h-10 mb-4">
-  <h4 class="page-header mb-0">Cabinets</h4>
-  <button class="btn-primary opacity-50 cursor-not-allowed" disabled title="Cabinet slots are fixed (A–D)">+ Add Cabinet</button>
+  <h4 class="page-header mb-0">System Administrators</h4>
+  <a href="{{ url_for('admin_add') }}" class="btn-primary">
+    + Add Admin
+  </a>
 </div>
 
 <div class="card" style="overflow: visible;">
@@ -20,37 +21,52 @@
     <table class="data-table">
       <thead>
         <tr>
-          <th>Cabinet ID</th>
-          <th>Description</th>
-          <th>Location</th>
+          <th>Admin</th>
+          <th>Username</th>
+          <th>Email</th>
+          <th>Created At</th>
           <th></th>
         </tr>
       </thead>
       <tbody>
-        {% for cab in cabinets %}
+        {% for a in admins %}
         <tr>
-          <td><span class="badge badge-cabinet text-sm px-3 py-1">{{ cab.cabinet_id }}</span></td>
-          <td>{{ cab.description or '—' }}</td>
-          <td class="text-gray-400 text-sm">{{ cab.location or '—' }}</td>
+          <td class="font-semibold">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-full bg-maroon/10 text-maroon flex items-center justify-center text-xs flex-shrink-0 font-bold">
+                {{ a.username[:2].upper() }}
+              </div>
+              <div class="leading-tight">
+                {{ a.full_name or '—' }}
+                {% if a.id == session.admin_id %}
+                  <span class="badge badge-enrolled ml-1">You</span>
+                {% endif %}
+              </div>
+            </div>
+          </td>
+          <td>{{ a.username }}</td>
+          <td class="text-gray-500 text-sm">{{ a.email or '—' }}</td>
+          <td class="text-gray-400 text-sm">{{ a.created_at.strftime('%b %d, %Y %I:%M %p') }}</td>
           <td class="text-right">
             <div class="relative inline-block text-left">
-              <button onclick="toggleDropdown('dropdown-cabinet-{{ cab.id }}')"
+              <button onclick="toggleDropdown('dropdown-admin-{{ a.id }}')"
                       class="dropdown-trigger p-1 rounded-lg hover:bg-gray-200 transition-colors text-gray-500">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
                   <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
                 </svg>
               </button>
 
-              <div id="dropdown-cabinet-{{ cab.id }}"
+              <div id="dropdown-admin-{{ a.id }}"
                    class="dropdown-menu hidden absolute right-0 mt-1 w-36 z-10 shadow-lg border border-gray-100 bg-white rounded-xl py-1">
-                <a href="{{ url_for('cabinet_edit', cabinet_id=cab.id) }}" class="dropdown-item">
+                <a href="{{ url_for('admin_edit', admin_id=a.id) }}" class="dropdown-item">
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
                     <path d="m13.488 2.513 2.899 2.899-2.022 2.023-2.899-2.899 2.022-2.023ZM11.414 4.586l-8.52 8.52A1.5 1.5 0 0 0 2.457 14.1l-.43 1.936a.75.75 0 0 0 .891.89l1.936-.43a1.5 1.5 0 0 0 1.012-.455l8.52-8.52-2.899-2.899Z" />
                   </svg>
                   Edit
                 </a>
-                <form method="post" action="{{ url_for('cabinet_delete', cabinet_id=cab.id) }}"
-                      onsubmit="return confirm('Delete Cabinet {{ cab.cabinet_id }}? All access logs for this cabinet will also be deleted.')">
+                {% if a.id != session.admin_id %}
+                <form method="post" action="{{ url_for('admin_delete', admin_id=a.id) }}"
+                      onsubmit="return confirm('Remove admin {{ a.username }}?')">
                   <button class="dropdown-item text-red-600 w-full text-left">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
                       <path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 0 0 6 3.75V4H5a2 2 0 0 0-2 2v.25C3 6.664 3.336 7 3.75 7h12.5a.75.75 0 0 0 .75-.75V6a2 2 0 0 0-2-2h-1V3.75A2.75 2.75 0 0 0 11.25 1h-2.5ZM10 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd" />
@@ -59,14 +75,9 @@
                     Delete
                   </button>
                 </form>
+                {% endif %}
               </div>
             </div>
-          </td>
-        </tr>
-        {% else %}
-        <tr>
-          <td colspan="4" class="text-center text-gray-400 py-6">
-            No cabinets yet.
           </td>
         </tr>
         {% endfor %}
@@ -75,4 +86,3 @@
   </div>
 </div>
 {% endblock %}
-

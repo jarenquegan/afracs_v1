@@ -10,6 +10,8 @@ SCHEMA = [
         id            INT AUTO_INCREMENT PRIMARY KEY,
         username      VARCHAR(100) UNIQUE NOT NULL,
         password_hash VARCHAR(255) NOT NULL,
+        full_name     VARCHAR(255) DEFAULT '',
+        email         VARCHAR(255) DEFAULT '',
         created_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
     """,
@@ -64,6 +66,8 @@ _MIGRATIONS = [
     "ALTER TABLE faculty ADD COLUMN IF NOT EXISTS department VARCHAR(255) DEFAULT ''",
     "ALTER TABLE access_logs ADD COLUMN IF NOT EXISTS cabinet_id INT",
     "ALTER TABLE faculty MODIFY COLUMN encoding BLOB NULL",
+    "ALTER TABLE admins ADD COLUMN IF NOT EXISTS full_name VARCHAR(255) DEFAULT ''",
+    "ALTER TABLE admins ADD COLUMN IF NOT EXISTS email VARCHAR(255) DEFAULT ''",
 ]
 
 _BOOTSTRAP = [
@@ -249,19 +253,61 @@ def log_access(
     conn.commit()
 
 
+def get_admin_by_username_or_email(conn, identifier: str) -> dict | None:
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT id, username, full_name, email, password_hash "
+            "FROM admins WHERE username = %s OR email = %s",
+            (identifier, identifier)
+        )
+        return cur.fetchone()
+
 def get_admin_by_username(conn, username: str) -> dict | None:
     with conn.cursor() as cur:
-        cur.execute("SELECT id, username, password_hash FROM admins WHERE username = %s", (username,))
+        cur.execute("SELECT id, username, full_name, email, password_hash FROM admins WHERE username = %s", (username,))
         return cur.fetchone()
 
 
-def create_admin(conn, username: str, password_hash: str) -> None:
+def create_admin(conn, username: str, password_hash: str, full_name: str = "", email: str = "") -> None:
     with conn.cursor() as cur:
         cur.execute(
-            "INSERT IGNORE INTO admins (username, password_hash) VALUES (%s, %s)",
-            (username, password_hash),
+            "INSERT IGNORE INTO admins (username, password_hash, full_name, email) VALUES (%s, %s, %s, %s)",
+            (username, password_hash, full_name, email),
         )
     conn.commit()
+
+
+def get_all_admins(conn) -> list[dict]:
+    with conn.cursor() as cur:
+        cur.execute("SELECT id, username, full_name, email, created_at FROM admins ORDER BY username")
+        return cur.fetchall()
+
+
+def delete_admin(conn, admin_id: int) -> None:
+    with conn.cursor() as cur:
+        cur.execute("DELETE FROM admins WHERE id = %s", (admin_id,))
+    conn.commit()
+
+
+def update_admin(conn, admin_id: int, username: str, full_name: str, email: str, password_hash: str | None = None) -> None:
+    with conn.cursor() as cur:
+        if password_hash:
+            cur.execute(
+                "UPDATE admins SET username=%s, full_name=%s, email=%s, password_hash=%s WHERE id=%s",
+                (username, full_name, email, password_hash, admin_id),
+            )
+        else:
+            cur.execute(
+                "UPDATE admins SET username=%s, full_name=%s, email=%s WHERE id=%s",
+                (username, full_name, email, admin_id),
+            )
+    conn.commit()
+
+
+def get_admin_by_id(conn, admin_id: int) -> dict | None:
+    with conn.cursor() as cur:
+        cur.execute("SELECT id, username, full_name, email, created_at FROM admins WHERE id = %s", (admin_id,))
+        return cur.fetchone()
 
 
 def update_faculty(
@@ -408,6 +454,55 @@ def get_access_logs(conn, page: int = 1, per_page: int = 50) -> tuple[list[dict]
         rows = cur.fetchall()
     return rows, total
 
+
+def get_filtered_logs(
+    conn,
+    start_date: str | None = None,
+    end_date: str | None = None,
+    start_time: str | None = None,
+    end_time: str | None = None,
+    cabinet_id: str | None = None,
+    faculty_id: str | None = None,
+    status: str | None = None,
+) -> list[dict]:
+    query = """
+        SELECT al.id, al.status, al.timestamp, al.note,
+               f.name AS faculty_name, f.id_number,
+               c.cabinet_id AS cabinet
+        FROM access_logs al
+        LEFT JOIN faculty f ON al.faculty_id = f.id
+        LEFT JOIN cabinets c ON al.cabinet_id = c.id
+        WHERE 1=1
+    """
+    params = []
+
+    if start_date:
+        query += " AND DATE(al.timestamp) >= %s"
+        params.append(start_date)
+    if end_date:
+        query += " AND DATE(al.timestamp) <= %s"
+        params.append(end_date)
+    if start_time:
+        query += " AND TIME(al.timestamp) >= %s"
+        params.append(start_time)
+    if end_time:
+        query += " AND TIME(al.timestamp) <= %s"
+        params.append(end_time)
+    if cabinet_id:
+        query += " AND c.id = %s"
+        params.append(cabinet_id)
+    if faculty_id:
+        query += " AND f.id = %s"
+        params.append(faculty_id)
+    if status:
+        query += " AND al.status = %s"
+        params.append(status)
+
+    query += " ORDER BY al.timestamp DESC"
+
+    with conn.cursor() as cur:
+        cur.execute(query, params)
+        return cur.fetchall()
 
 if __name__ == "__main__":
     init_db()

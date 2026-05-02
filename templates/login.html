@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>AFRACS — Login</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/afracs_logo.png') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/output.css') }}">
 </head>
 <body class="min-h-screen font-sans flex">
@@ -53,10 +54,10 @@
 
       <form method="post" class="space-y-4">
         <div>
-          <label class="form-label">Username</label>
+          <label class="form-label">Username or Email</label>
           <input type="text" name="username"
                  class="form-input"
-                 placeholder="Enter your username"
+                 placeholder="Enter your username or email"
                  autofocus required>
         </div>
         <div>
