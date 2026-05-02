@@ -422,10 +422,11 @@ def about():
 @login_required
 def logs():
     page = int(request.args.get("page", 1))
+    search = request.args.get("q", "").strip()
     per_page = 50
-    rows, total = db.get_access_logs(get_db(), page=page, per_page=per_page)
+    rows, total = db.get_access_logs(get_db(), page=page, per_page=per_page, search=search)
     pages = (total + per_page - 1) // per_page
-    return render_template("logs/list.html", logs=rows, page=page, pages=pages, total=total)
+    return render_template("logs/list.html", logs=rows, page=page, pages=pages, total=total, search=search)
 
 
 @app.route("/reports")

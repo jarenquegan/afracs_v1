@@ -435,21 +435,33 @@ def delete_cabinet(conn, id: int) -> None:
     conn.commit()
 
 
-def get_access_logs(conn, page: int = 1, per_page: int = 50) -> tuple[list[dict], int]:
+def get_access_logs(conn, page: int = 1, per_page: int = 50, search: str = "") -> tuple[list[dict], int]:
     offset = (page - 1) * per_page
+    base = """
+        FROM access_logs al
+        LEFT JOIN faculty f ON al.faculty_id = f.id
+        LEFT JOIN cabinets c ON al.cabinet_id = c.id
+    """
+    params: list = []
+    if search:
+        base += """
+        WHERE (f.name LIKE %s OR f.id_number LIKE %s
+               OR c.cabinet_id LIKE %s OR al.status LIKE %s OR al.note LIKE %s)
+        """
+        like = f"%{search}%"
+        params = [like, like, like, like, like]
+
     with conn.cursor() as cur:
-        cur.execute("SELECT COUNT(*) AS total FROM access_logs")
+        cur.execute(f"SELECT COUNT(*) AS total {base}", params)
         total = cur.fetchone()["total"]
         cur.execute(
-            """SELECT al.id, al.status, al.timestamp, al.note,
-                      f.name AS faculty_name, f.id_number,
-                      c.cabinet_id AS cabinet
-               FROM access_logs al
-               LEFT JOIN faculty f ON al.faculty_id = f.id
-               LEFT JOIN cabinets c ON al.cabinet_id = c.id
-               ORDER BY al.timestamp DESC
-               LIMIT %s OFFSET %s""",
-            (per_page, offset),
+            f"""SELECT al.id, al.status, al.timestamp, al.note,
+                       f.name AS faculty_name, f.id_number,
+                       c.cabinet_id AS cabinet
+                {base}
+                ORDER BY al.timestamp DESC
+                LIMIT %s OFFSET %s""",
+            params + [per_page, offset],
         )
         rows = cur.fetchall()
     return rows, total

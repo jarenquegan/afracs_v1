@@ -15,6 +15,16 @@
   <span class="text-gray-400 text-sm">{{ total }} total event{{ 's' if total != 1 }}</span>
 </div>
 
+<form method="get" action="{{ url_for('logs') }}" class="mb-4">
+  <div class="relative max-w-sm">
+    <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" viewBox="0 0 20 20" fill="currentColor">
+      <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.452 4.391l3.328 3.329a.75.75 0 1 1-1.06 1.06l-3.329-3.328A7 7 0 0 1 2 9Z" clip-rule="evenodd"/>
+    </svg>
+    <input type="text" name="q" value="{{ search }}" placeholder="Search faculty, cabinet, status…"
+           class="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-maroon/30 focus:border-maroon">
+  </div>
+</form>
+
 <div class="card">
   <div class="overflow-x-auto">
     <table class="data-table">
@@ -62,13 +72,13 @@
 
   {% if pages > 1 %}
   <div class="px-4 py-3 border-t border-gray-100 flex justify-center gap-1">
-    <a href="{{ url_for('logs', page=page-1) }}"
+    <a href="{{ url_for('logs', page=page-1, q=search) }}"
        class="px-3 py-1 text-sm rounded border border-gray-200 {% if page == 1 %}pointer-events-none text-gray-300{% else %}hover:bg-gray-50{% endif %}">
       ‹
     </a>
     {% for p in range(1, pages+1) %}
       {% if p == page or p == 1 or p == pages or (p >= page-2 and p <= page+2) %}
-        <a href="{{ url_for('logs', page=p) }}"
+        <a href="{{ url_for('logs', page=p, q=search) }}"
            class="px-3 py-1 text-sm rounded border {% if p == page %}bg-maroon text-white border-maroon{% else %}border-gray-200 hover:bg-gray-50{% endif %}">
           {{ p }}
         </a>
@@ -76,7 +86,7 @@
         <span class="px-2 py-1 text-sm text-gray-300">…</span>
       {% endif %}
     {% endfor %}
-    <a href="{{ url_for('logs', page=page+1) }}"
+    <a href="{{ url_for('logs', page=page+1, q=search) }}"
        class="px-3 py-1 text-sm rounded border border-gray-200 {% if page == pages %}pointer-events-none text-gray-300{% else %}hover:bg-gray-50{% endif %}">
       ›
     </a>

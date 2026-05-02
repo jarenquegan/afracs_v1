@@ -16,9 +16,17 @@
   </a>
 </div>
 
+<div class="relative max-w-sm mb-4">
+  <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" viewBox="0 0 20 20" fill="currentColor">
+    <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.452 4.391l3.328 3.329a.75.75 0 1 1-1.06 1.06l-3.329-3.328A7 7 0 0 1 2 9Z" clip-rule="evenodd"/>
+  </svg>
+  <input id="faculty-search" type="text" placeholder="Search name, ID, position, department…"
+         class="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-maroon/30 focus:border-maroon">
+</div>
+
 <div class="card" style="overflow: visible;">
   <div style="overflow: visible;">
-    <table class="data-table">
+    <table id="faculty-table" class="data-table">
       <thead>
         <tr>
           <th>ID Number</th>
@@ -33,7 +41,7 @@
       </thead>
       <tbody>
         {% for f in faculty %}
-        <tr>
+        <tr data-row="{{ [f.id_number, f.name, f.position, f.department] | join(' ') | lower }}">
           <td class="text-gray-400 text-xs">{{ f.id_number }}</td>
           <td class="font-semibold">
             <div class="flex items-center gap-2">
@@ -108,5 +116,14 @@
   <strong class="text-gray-500">Pending</strong> = profile created but face not yet enrolled.
   Enrollment can be performed by <span class="font-semibold">Editing</span> the profile.
 </p>
+
+<script>
+document.getElementById('faculty-search').addEventListener('input', function () {
+  const q = this.value.toLowerCase();
+  document.querySelectorAll('#faculty-table tbody tr[data-row]').forEach(row => {
+    row.style.display = row.dataset.row.includes(q) ? '' : 'none';
+  });
+});
+</script>
 {% endblock %}
 
