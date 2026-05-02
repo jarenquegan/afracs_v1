@@ -12,12 +12,9 @@
 {% block content %}
 <div class="flex items-center gap-3 mb-4">
   <h4 class="page-header mb-0 flex-1">Access Logs</h4>
-  <form method="get" action="{{ url_for('logs') }}" class="relative">
-    <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" viewBox="0 0 20 20" fill="currentColor">
-      <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.452 4.391l3.328 3.329a.75.75 0 1 1-1.06 1.06l-3.329-3.328A7 7 0 0 1 2 9Z" clip-rule="evenodd"/>
-    </svg>
+  <form method="get" action="{{ url_for('logs') }}">
     <input type="text" name="q" value="{{ search }}" placeholder="Search logs…"
-           class="search-input pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg w-64">
+           class="search-input px-3 py-2 text-sm border border-gray-200 rounded-lg w-56">
   </form>
   <span class="text-gray-400 text-sm whitespace-nowrap">{{ total }} total event{{ 's' if total != 1 }}</span>
 </div>
