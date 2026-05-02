@@ -72,13 +72,13 @@ FACULTY = [
 
 # Access log volume ramps up toward today (mirrors the chart shape)
 DAILY_EVENTS = {
-    6: 1,
-    5: 1,
-    4: 1,
-    3: 2,
-    2: 2,
-    1: 4,
-    0: 55,
+    6: 60,
+    5: 65,
+    4: 58,
+    3: 120,
+    2: 135,
+    1: 240,
+    0: 3300,
 }
 
 CABINETS = ["A", "B", "C", "D"]
