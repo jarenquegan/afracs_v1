@@ -65,7 +65,9 @@ class CabinetLock:
         pin: int = config.GPIO_LOCK_PIN,
         pulse_seconds: float = config.LOCK_PULSE_SECONDS,
     ):
-        self._device = OutputDevice(pin, active_high=True, initial_value=False)
+        # active_high=False is for Active-Low relay modules (common on Pi)
+        # initial_value=False means the relay is OFF at startup
+        self._device = OutputDevice(pin, active_high=False, initial_value=False)
         self._pulse_seconds = pulse_seconds
         self._secured = True
 

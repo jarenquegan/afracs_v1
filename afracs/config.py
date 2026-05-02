@@ -18,7 +18,7 @@ CABINET_NAME = os.getenv("CABINET_NAME", "Cabinet")
 GPIO_LOCK_PIN = int(os.getenv("GPIO_LOCK_PIN", "17"))
 GPIO_BUZZER_PIN = int(os.getenv("GPIO_BUZZER_PIN", "24"))
 BUZZER_FREQUENCY = int(os.getenv("BUZZER_FREQUENCY", "2500"))
-LOCK_PULSE_SECONDS = float(os.getenv("LOCK_PULSE_SECONDS", "7.5"))
+LOCK_PULSE_SECONDS = float(os.getenv("LOCK_PULSE_SECONDS", "5.0"))
 
 ALERT_AFTER_FAILED_ATTEMPTS = int(os.getenv("ALERT_AFTER_FAILED_ATTEMPTS", "5"))
 
