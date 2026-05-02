@@ -80,6 +80,10 @@ class CabinetWindow(QMainWindow):
         self._frame_timer = QTimer(self)
         self._frame_timer.timeout.connect(self._update_camera_frame)
 
+        # Initialize hardware immediately
+        self._init_locks()
+        self._init_buzzer()
+
         self._build_ui()
         self._wire_pages()
         self._wire_shortcuts()
