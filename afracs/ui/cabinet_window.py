@@ -132,8 +132,8 @@ class CabinetWindow(QMainWindow):
         self.setCentralWidget(root)
 
     def _wire_pages(self) -> None:
+        self.header.exit_requested.connect(self.close)
         self.sleep_page.wake_requested.connect(self.wake)
-        self.sleep_page.admin_requested.connect(self._open_admin_panel)
         self.detecting_page.cancel_requested.connect(lambda: self.set_state(State.SLEEP))
         self.selecting_page.cabinet_selected.connect(self._on_cabinet_selected)
         self.selecting_page.cancel_requested.connect(lambda: self.set_state(State.SLEEP))

@@ -12,8 +12,7 @@ from afracs.ui.clock import ClockLabel, DateLabel
 
 
 class SleepPage(QWidget):
-    wake_requested  = pyqtSignal()
-    admin_requested = pyqtSignal()
+    wake_requested = pyqtSignal()
 
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
@@ -51,19 +50,6 @@ class SleepPage(QWidget):
 
         body_layout.addStretch(2)
         outer.addWidget(body, stretch=1)
-
-        admin_row = QHBoxLayout()
-        admin_row.setContentsMargins(0, 0, 16, 10)
-        admin_row.addStretch(1)
-        self.admin_button = QPushButton("⚙  Admin")
-        self.admin_button.setObjectName("adminButton")
-        self.admin_button.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.admin_button.clicked.connect(self._on_admin_clicked)
-        admin_row.addWidget(self.admin_button)
-        outer.addLayout(admin_row)
-
-    def _on_admin_clicked(self) -> None:
-        self.admin_requested.emit()
 
     def set_lock_secured(self, secured: bool) -> None:
         pass
