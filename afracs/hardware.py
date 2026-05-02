@@ -2,26 +2,36 @@
 import threading
 import time
 
-from gpiozero import Buzzer as GpioBuzzer, OutputDevice
+from gpiozero import PWMOutputDevice, OutputDevice
 
 from afracs import config
 
 
 class Buzzer:
     def __init__(self, pin: int = config.GPIO_BUZZER_PIN):
-        self._device = GpioBuzzer(pin)
+        # We use PWM to "drive" the buzzer at a specific frequency (2500Hz is standard for buzzers)
+        self._device = PWMOutputDevice(pin, initial_value=0, frequency=2500)
+
+    def _beep(self, n: int, duration: float = 0.1) -> None:
+        def run():
+            for _ in range(n):
+                self._device.value = 0.5  # 50% duty cycle creates the square wave
+                time.sleep(duration)
+                self._device.value = 0
+                time.sleep(duration)
+        threading.Thread(target=run, daemon=True).start()
 
     def success(self) -> None:
-        """One short beep for success."""
-        self._device.beep(on_time=0.1, off_time=0.1, n=1, background=True)
+        """One medium beep."""
+        self._beep(n=1, duration=0.15)
 
     def failure(self) -> None:
-        """Two quick beeps for failure."""
-        self._device.beep(on_time=0.1, off_time=0.1, n=2, background=True)
+        """Two quick sharp beeps."""
+        self._beep(n=2, duration=0.08)
 
     def alert(self) -> None:
-        """Rapid beeps for alert state."""
-        self._device.beep(on_time=0.05, off_time=0.05, n=10, background=True)
+        """Fast rapid beeps."""
+        self._beep(n=10, duration=0.05)
 
     def close(self) -> None:
         self._device.close()
