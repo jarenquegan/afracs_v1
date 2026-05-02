@@ -9,8 +9,8 @@ from afracs import config
 
 class Buzzer:
     def __init__(self, pin: int = config.GPIO_BUZZER_PIN):
-        # We use PWM to "drive" the buzzer at a specific frequency (2500Hz is standard for buzzers)
-        self._device = PWMOutputDevice(pin, initial_value=0, frequency=2500)
+        # We use PWM to "drive" the buzzer at a specific frequency
+        self._device = PWMOutputDevice(pin, initial_value=0, frequency=config.BUZZER_FREQUENCY)
 
     def _beep(self, n: int, duration: float = 0.1) -> None:
         def run():
