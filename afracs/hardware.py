@@ -2,9 +2,29 @@
 import threading
 import time
 
-from gpiozero import OutputDevice
+from gpiozero import Buzzer as GpioBuzzer, OutputDevice
 
 from afracs import config
+
+
+class Buzzer:
+    def __init__(self, pin: int = config.GPIO_BUZZER_PIN):
+        self._device = GpioBuzzer(pin)
+
+    def success(self) -> None:
+        """One short beep for success."""
+        self._device.beep(on_time=0.1, off_time=0.1, n=1, background=True)
+
+    def failure(self) -> None:
+        """Two quick beeps for failure."""
+        self._device.beep(on_time=0.1, off_time=0.1, n=2, background=True)
+
+    def alert(self) -> None:
+        """Rapid beeps for alert state."""
+        self._device.beep(on_time=0.05, off_time=0.05, n=10, background=True)
+
+    def close(self) -> None:
+        self._device.close()
 
 
 class CabinetLock:

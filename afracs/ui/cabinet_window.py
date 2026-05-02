@@ -68,6 +68,7 @@ class CabinetWindow(QMainWindow):
         self._cabinet_info: dict[str, str] = {}
 
         self._lock_bank = None
+        self._buzzer = None
 
         self._frame_count = 0
         self._match_streak = 0
@@ -194,6 +195,7 @@ class CabinetWindow(QMainWindow):
         self._failed_attempts = 0
         self._log_access(faculty["id"], "granted", cabinet_id=cabinet_id, note=f"Cabinet {cabinet_id}")
         self._fire_lock(cabinet_id)
+        self._beep_success()
         self.set_state(
             State.GRANTED,
             name=faculty["name"],
@@ -269,6 +271,30 @@ class CabinetWindow(QMainWindow):
         if self._lock_bank is not None:
             self._lock_bank.unlock(cabinet_id)
 
+    def _init_buzzer(self) -> None:
+        if self._buzzer is not None:
+            return
+        try:
+            from afracs.hardware import Buzzer
+            self._buzzer = Buzzer()
+        except Exception as exc:
+            log.warning("Could not init buzzer: %s", exc)
+
+    def _beep_success(self) -> None:
+        self._init_buzzer()
+        if self._buzzer:
+            self._buzzer.success()
+
+    def _beep_failure(self) -> None:
+        self._init_buzzer()
+        if self._buzzer:
+            self._buzzer.failure()
+
+    def _beep_alert(self) -> None:
+        self._init_buzzer()
+        if self._buzzer:
+            self._buzzer.alert()
+
     def _open_camera(self) -> None:
         if self._cap is not None:
             return
@@ -328,12 +354,14 @@ class CabinetWindow(QMainWindow):
                 accessible = [c for c in result.cabinets]
                 if not accessible:
                     self._log_access(result.faculty_id, "denied", note="No cabinet access assigned")
+                    self._beep_failure()
                     self.set_state(State.DENIED, attempt=self._failed_attempts, reason="no_cabinet")
                 elif len(accessible) == 1:
                     self._failed_attempts = 0
                     cabinet_id = accessible[0]
                     self._log_access(result.faculty_id, "granted", cabinet_id=cabinet_id, note=f"Cabinet {cabinet_id}")
                     self._fire_lock(cabinet_id)
+                    self._beep_success()
                     self.set_state(
                         State.GRANTED,
                         name=result.name,
@@ -350,6 +378,7 @@ class CabinetWindow(QMainWindow):
                         {"id": c, "description": self._cabinet_info.get(c, c)}
                         for c in accessible
                     ]
+                    self._beep_success()
                     self.set_state(
                         State.SELECTING,
                         name=result.name,
@@ -362,10 +391,12 @@ class CabinetWindow(QMainWindow):
             if self._no_match_frames >= config.UNRECOGNISED_DENY_FRAMES:
                 self._failed_attempts += 1
                 self._log_access(None, "denied", note=f"confidence={result.confidence:.3f}")
+                self._beep_failure()
                 self.set_state(State.DENIED, attempt=self._failed_attempts)
 
     def _after_denied(self) -> None:
         if self._failed_attempts >= config.ALERT_AFTER_FAILED_ATTEMPTS:
+            self._beep_alert()
             self.set_state(State.ALERT)
         else:
             self.set_state(State.DETECTING)
@@ -376,10 +407,12 @@ class CabinetWindow(QMainWindow):
 
     def _dev_grant(self) -> None:
         self._failed_attempts = 0
+        self._beep_success()
         self.set_state(State.GRANTED, name="Dr. Cruz", role="College of Health Faculty", cabinet="A")
 
     def _dev_deny(self) -> None:
         self._failed_attempts += 1
+        self._beep_failure()
         self.set_state(State.DENIED, attempt=self._failed_attempts)
 
     def _toggle_lock_indicator(self) -> None:
@@ -403,6 +436,11 @@ class CabinetWindow(QMainWindow):
         if self._lock_bank is not None:
             try:
                 self._lock_bank.close()
+            except Exception:
+                pass
+        if self._buzzer is not None:
+            try:
+                self._buzzer.close()
             except Exception:
                 pass
         if self._db_conn is not None:

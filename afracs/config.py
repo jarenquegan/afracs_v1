@@ -16,6 +16,7 @@ CAMERA_INDEX = int(os.getenv("CAMERA_INDEX", "0"))
 CABINET_NAME = os.getenv("CABINET_NAME", "Cabinet")
 
 GPIO_LOCK_PIN = int(os.getenv("GPIO_LOCK_PIN", "17"))
+GPIO_BUZZER_PIN = int(os.getenv("GPIO_BUZZER_PIN", "24"))
 LOCK_PULSE_SECONDS = float(os.getenv("LOCK_PULSE_SECONDS", "7.5"))
 
 ALERT_AFTER_FAILED_ATTEMPTS = int(os.getenv("ALERT_AFTER_FAILED_ATTEMPTS", "5"))
